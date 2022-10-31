@@ -29,6 +29,8 @@ public class Manager {
 
     public void removeAllEpics() {
         epics.clear();
+        // подзадача не может существовать сама по себе
+        removeAllSubtasks();
     }
 
     public void removeAllSubtasks() {
@@ -76,6 +78,7 @@ public class Manager {
         }
     }
 
+    // TODO: 31.10.2022 test and fix
     public void updateEpic(Epic epic) {
         for (Epic savedEpic : epics.values()) {
             if (savedEpic.getName().equals(epic.getName())) {
@@ -88,8 +91,11 @@ public class Manager {
         } else {
             tasks.put(epic.getId(), epic);
         }
+
+        epic.computeAndSetStatus();
     }
 
+    // TODO: 31.10.2022 test and fix
     public void updateSubtask(Subtask subtask) {
         for (Subtask savedSubtask : subtasks.values()) {
             if (savedSubtask.getName().equals(subtask.getName())) {
@@ -119,6 +125,11 @@ public class Manager {
     }
 
     public void removeEpicById(int id) {
+        // подзадача не может существовать сама по себе
+        for (Subtask subtask : epics.get(id).getSubtasks()) {
+            removeSubtaskById(subtask.getId());
+        }
+
         epics.remove(id);
     }
 

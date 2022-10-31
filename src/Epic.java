@@ -29,17 +29,6 @@ public class Epic extends Task {
         computeAndSetStatus();
     }
 
-    @Override
-    public String toString() {
-        return "Epic{" +
-                "name='" + getName() + '\'' +
-                ", description='" + getDescription() + '\'' +
-                ", id=" + getId() +
-                ", status='" + getStatus() + '\'' +
-                ", subtasks=" + Arrays.toString(subtasks.toArray()) +
-                '}';
-    }
-
     public List<Subtask> getSubtasks() {
         return subtasks;
     }
@@ -79,5 +68,16 @@ public class Epic extends Task {
         for (Subtask subtask : subtasks) {
             subtask.setSubtaskEpic(this);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Epic{" +
+                "name='" + getName() + '\'' +
+                ", description='" + getDescription() + '\'' +
+                ", id=" + getId() +
+                ", status='" + getStatus() + '\'' +
+                ", subtasks=" + Arrays.toString(subtasks.toArray()) +
+                '}';
     }
 }

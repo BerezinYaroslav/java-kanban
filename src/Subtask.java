@@ -21,16 +21,6 @@ public class Subtask extends Task {
         epic.computeAndSetStatus();
     }
 
-    @Override
-    public String toString() {
-        return "Subtask{" +
-                "name='" + getName() + '\'' +
-                ", description='" + getDescription() + '\'' +
-                ", id=" + getId() +
-                ", status='" + getStatus() + '\'' +
-                '}';
-    }
-
     public Epic getEpic() {
         return epic;
     }
@@ -44,5 +34,13 @@ public class Subtask extends Task {
         this.epic = epic;
     }
 
-
+    @Override
+    public String toString() {
+        return "Subtask{" +
+                "name='" + getName() + '\'' +
+                ", description='" + getDescription() + '\'' +
+                ", id=" + getId() +
+                ", status='" + getStatus() + '\'' +
+                '}';
+    }
 }
