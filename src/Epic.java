@@ -17,12 +17,14 @@ public class Epic extends Task {
 
     public Epic(String name, String description, List<Subtask> subtasks) {
         super(name, description);
+        setEpicToAllSubtasks(subtasks);
         this.subtasks = subtasks;
         computeAndSetStatus();
     }
 
     public Epic(String name, String description, String status, List<Subtask> subtasks) {
         super(name, description, status);
+        setEpicToAllSubtasks(subtasks);
         this.subtasks = subtasks;
         computeAndSetStatus();
     }
@@ -32,7 +34,7 @@ public class Epic extends Task {
         return "Epic{" +
                 "name='" + getName() + '\'' +
                 ", description='" + getDescription() + '\'' +
-                ", id=" + getDescription() +
+                ", id=" + getId() +
                 ", status='" + getStatus() + '\'' +
                 ", subtasks=" + Arrays.toString(subtasks.toArray()) +
                 '}';
@@ -43,6 +45,7 @@ public class Epic extends Task {
     }
 
     public void setSubtasks(List<Subtask> subtasks) {
+        setEpicToAllSubtasks(subtasks);
         this.subtasks = subtasks;
         computeAndSetStatus();
     }
@@ -69,6 +72,12 @@ public class Epic extends Task {
             this.setStatus("DONE");
         } else {
             this.setStatus("IN_PROGRESS");
+        }
+    }
+
+    public void setEpicToAllSubtasks(List<Subtask> subtasks) {
+        for (Subtask subtask : subtasks) {
+            subtask.setSubtaskEpic(this);
         }
     }
 }

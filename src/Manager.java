@@ -3,7 +3,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Manager {
-    private int id = 0;
+    private int taskId = 0;
+    private int epicsId = 0;
+    private int subtaskId = 0;
 
     private HashMap<Integer, Task> tasks = new HashMap<>();
     private HashMap<Integer, Epic> epics = new HashMap<>();
@@ -37,7 +39,7 @@ public class Manager {
         return tasks.get(id);
     }
 
-    public Epic getEpicsById(int id) {
+    public Epic getEpicById(int id) {
         return epics.get(id);
     }
 
@@ -46,17 +48,17 @@ public class Manager {
     }
 
     public void createTask(Task task) {
-        task.setId(++id);
+        task.setId(++taskId);
         tasks.put(task.getId(), task);
     }
 
     public void createEpic(Epic epic) {
-        epic.setId(++id);
+        epic.setId(++epicsId);
         epics.put(epic.getId(), epic);
     }
 
     public void createSubtask(Subtask subtask) {
-        subtask.setId(++id);
+        subtask.setId(++subtaskId);
         subtasks.put(subtask.getId(), subtask);
     }
 
@@ -92,14 +94,24 @@ public class Manager {
         for (Subtask savedSubtask : subtasks.values()) {
             if (savedSubtask.getName().equals(subtask.getName())) {
                 subtask.setId(savedSubtask.getId());
+                subtask.setEpic(savedSubtask.getEpic());
+                break;
             }
         }
 
         if (subtask.getId() == null) {
             System.out.println("Невозможно обновить задачу: такой задачи не существует");
         } else {
-            tasks.put(subtask.getId(), subtask);
+            subtasks.put(subtask.getId(), subtask);
         }
+
+        for (Subtask oldSubtask : subtask.getEpic().getSubtasks()) {
+            if (oldSubtask.getId().equals(subtask.getId())) {
+                oldSubtask.setStatus(subtask.getStatus());
+            }
+        }
+
+        subtask.getEpic().computeAndSetStatus();
     }
 
     public void removeTaskById(int id) {

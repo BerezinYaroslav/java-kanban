@@ -28,7 +28,6 @@ public class Subtask extends Task {
                 ", description='" + getDescription() + '\'' +
                 ", id=" + getId() +
                 ", status='" + getStatus() + '\'' +
-                ", epic=" + epic.getName() +
                 '}';
     }
 
@@ -40,4 +39,10 @@ public class Subtask extends Task {
         this.epic = epic;
         epic.computeAndSetStatus();
     }
+
+    public void setSubtaskEpic(Epic epic) {
+        this.epic = epic;
+    }
+
+
 }
