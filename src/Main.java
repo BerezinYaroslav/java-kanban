@@ -5,14 +5,14 @@ public class Main {
     public static void main(String[] args) {
         Manager manager = new Manager();
 
-        // 2 задачи
+        // создаем 2 задачи
         Task task1 = new Task("Помыть машину", "Уже и забыл, когда в последний раз был на мойке");
         manager.createTask(task1);
 
         Task task2 = new Task("Погулять с котом", "Что-то он засиделся");
         manager.createTask(task2);
 
-        // эпик с 2 подзадачами
+        // создаем эпик с 2 подзадачами
         Subtask subtask1 = new Subtask("Купить сыр", "400 гр");
         Subtask subtask2 = new Subtask("Купить молоко", "2 л");
         List<Subtask> subtaskList = new ArrayList<>();
@@ -25,7 +25,7 @@ public class Main {
         Epic epic1 = new Epic("Купить продукты домой", "Вернулись с отпуска, есть нечего", subtaskList);
         manager.createEpic(epic1);
 
-        // эпик с 1 подзадачей
+        // создаем эпик с 1 подзадачей
         Subtask subtask3 = new Subtask("Помыть пол", "На этом можно и закончить");
         List<Subtask> subtaskList2 = new ArrayList<>();
 
@@ -35,7 +35,7 @@ public class Main {
         Epic epic2 = new Epic("Убраться дома", "И правда грязно...", subtaskList2);
         manager.createEpic(epic2);
 
-        // печать всех задач, эпиков и подзадач
+        // печатаем все задачи, эпики и подзадачи
         System.out.println(manager.getAllTasks());
         System.out.println(manager.getAllEpics());
         System.out.println(manager.getAllSubtasks());
@@ -49,14 +49,22 @@ public class Main {
         System.out.println(manager.getEpicById(2).getStatus());
         System.out.println();
 
-        // удаляем одну задачу и один эпик, проверяем
+        // удаляем одну задачу и один эпик
         manager.removeTaskById(1);
         manager.removeEpicById(1);
 
         System.out.println(manager.getAllTasks());
         System.out.println(manager.getAllEpics());
         System.out.println(manager.getAllSubtasks());
+        System.out.println();
 
-        // удаляем все задачи, все подзадачи и все эпики
+        // удаляем все задачи, подзадачи и эпики
+        manager.removeAllSubtasks();
+        manager.removeAllEpics();
+        manager.removeAllTasks();
+
+        System.out.println(manager.getAllSubtasks());
+        System.out.println(manager.getAllEpics());
+        System.out.println(manager.getAllTasks());
     }
 }
