@@ -2,12 +2,7 @@ public class Task {
     private String name;
     private String description;
     private Integer id;
-    private String status = "NEW";
-
-    public Task(String name, String description) {
-        this.name = name;
-        this.description = description;
-    }
+    private String status;
 
     public Task(String name, String description, String status) {
         this.name = name;

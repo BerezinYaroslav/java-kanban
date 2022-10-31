@@ -7,9 +7,9 @@ public class Manager {
     private int epicsId = 0;
     private int subtaskId = 0;
 
-    private HashMap<Integer, Task> tasks = new HashMap<>();
-    private HashMap<Integer, Epic> epics = new HashMap<>();
-    private HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private final HashMap<Integer, Task> tasks = new HashMap<>();
+    private final HashMap<Integer, Epic> epics = new HashMap<>();
+    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
 
     public List<Task> getAllTasks() {
         return new ArrayList<>(tasks.values());
@@ -29,7 +29,6 @@ public class Manager {
 
     public void removeAllEpics() {
         epics.clear();
-        // подзадача не может существовать сама по себе
         removeAllSubtasks();
     }
 
@@ -49,75 +48,76 @@ public class Manager {
         return subtasks.get(id);
     }
 
-    public void createTask(Task task) {
-        task.setId(++taskId);
-        tasks.put(task.getId(), task);
+    public Integer addTask(Task task) {
+        final Integer id = ++taskId;
+        task.setId(id);
+        tasks.put(id, task);
+
+        return id;
     }
 
-    public void createEpic(Epic epic) {
-        epic.setId(++epicsId);
-        epics.put(epic.getId(), epic);
+    public Integer addEpic(Epic epic) {
+        final Integer id = ++epicsId;
+        epic.setId(id);
+        epics.put(id, epic);
+
+        return id;
     }
 
-    public void createSubtask(Subtask subtask) {
-        subtask.setId(++subtaskId);
-        subtasks.put(subtask.getId(), subtask);
+    public Integer addSubtask(Subtask subtask) {
+        final Integer id = ++subtaskId;
+        subtask.setId(id);
+        Epic epic = getEpicById(subtask.getEpicId());
+        epic.addSubtaskId(id);
+        subtasks.put(id, subtask);
+
+        updateEpic(epic);
+        return id;
     }
 
     public void updateTask(Task task) {
-        for (Task savedTask : tasks.values()) {
-            if (savedTask.getName().equals(task.getName())) {
-                task.setId(savedTask.getId());
-            }
-        }
+        Task oldTask = getTaskById(task.getId());
 
-        if (task.getId() == null) {
-            System.out.println("Невозможно обновить задачу: такой задачи не существует");
-        } else {
-            tasks.put(task.getId(), task);
-        }
+        oldTask.setName(task.getName());
+        oldTask.setDescription(task.getDescription());
+        oldTask.setId(task.getId());
+        oldTask.setStatus(task.getStatus());
     }
 
-    // TODO: 31.10.2022 test and fix
     public void updateEpic(Epic epic) {
-        for (Epic savedEpic : epics.values()) {
-            if (savedEpic.getName().equals(epic.getName())) {
-                epic.setId(savedEpic.getId());
+        boolean isAllSubtasksNew = true;
+        boolean isAllSubtasksDone = true;
+
+        for (Integer id : epic.getSubtasksIds()) {
+            Subtask subtask = getSubtaskById(id);
+
+            if (!subtask.getStatus().equals("NEW")) {
+                isAllSubtasksNew = false;
+            }
+
+            if (!subtask.getStatus().equals("DONE")) {
+                isAllSubtasksDone = false;
             }
         }
 
-        if (epic.getId() == null) {
-            System.out.println("Невозможно обновить задачу: такой задачи не существует");
+        if (isAllSubtasksNew) {
+            epic.setStatus("NEW");
+        } else if (isAllSubtasksDone) {
+            epic.setStatus("DONE");
         } else {
-            tasks.put(epic.getId(), epic);
+            epic.setStatus("IN_PROGRESS");
         }
-
-        epic.computeAndSetStatus();
     }
 
-    // TODO: 31.10.2022 test and fix
     public void updateSubtask(Subtask subtask) {
-        for (Subtask savedSubtask : subtasks.values()) {
-            if (savedSubtask.getName().equals(subtask.getName())) {
-                subtask.setId(savedSubtask.getId());
-                subtask.setEpic(savedSubtask.getEpic());
-                break;
-            }
-        }
+        Task oldSubtask = getSubtaskById(subtask.getId());
 
-        if (subtask.getId() == null) {
-            System.out.println("Невозможно обновить задачу: такой задачи не существует");
-        } else {
-            subtasks.put(subtask.getId(), subtask);
-        }
+        oldSubtask.setName(subtask.getName());
+        oldSubtask.setDescription(subtask.getDescription());
+        oldSubtask.setId(subtask.getId());
+        oldSubtask.setStatus(subtask.getStatus());
 
-        for (Subtask oldSubtask : subtask.getEpic().getSubtasks()) {
-            if (oldSubtask.getId().equals(subtask.getId())) {
-                oldSubtask.setStatus(subtask.getStatus());
-            }
-        }
-
-        subtask.getEpic().computeAndSetStatus();
+        updateEpic(getEpicById(subtask.getEpicId()));
     }
 
     public void removeTaskById(int id) {
@@ -125,9 +125,8 @@ public class Manager {
     }
 
     public void removeEpicById(int id) {
-        // подзадача не может существовать сама по себе
-        for (Subtask subtask : epics.get(id).getSubtasks()) {
-            removeSubtaskById(subtask.getId());
+        for (Integer subtaskId : epics.get(id).getSubtasksIds()) {
+            removeSubtaskById(subtaskId);
         }
 
         epics.remove(id);
@@ -137,7 +136,7 @@ public class Manager {
         subtasks.remove(id);
     }
 
-    public List<Subtask> getSubtasksByEpic(Epic epic) {
-        return epic.getSubtasks();
+    public List<Integer> getSubtasksIdsByEpic(Epic epic) {
+        return epic.getSubtasksIds();
     }
 }

@@ -1,70 +1,55 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class Main {
     public static void main(String[] args) {
         Manager manager = new Manager();
 
-        // создаем 2 задачи
-        Task task1 = new Task("Помыть машину", "Уже и забыл, когда в последний раз был на мойке");
-        manager.createTask(task1);
+        // создать 2 задачи
+        Task walkWithCat = new Task("Погулять с котом", "А то сидит весь день дома", "NEW");
+        Task payEducation = new Task("Оплатить обучение", "Оплатить до 12.11.22", "NEW");
 
-        Task task2 = new Task("Погулять с котом", "Что-то он засиделся");
-        manager.createTask(task2);
+        int walkWithCatId = manager.addTask(walkWithCat);
+        int payEducationId = manager.addTask(payEducation);
 
-        // создаем эпик с 2 подзадачами
-        Subtask subtask1 = new Subtask("Купить сыр", "400 гр");
-        Subtask subtask2 = new Subtask("Купить молоко", "2 л");
-        List<Subtask> subtaskList = new ArrayList<>();
+        // создать эпик с двумя подзадачами
+        Epic goToShop = new Epic("Сходить в магазин", "Холодильник пустой", "NEW");
+        int goToShopId = manager.addEpic(goToShop);
 
-        manager.createSubtask(subtask1);
-        manager.createSubtask(subtask2);
-        subtaskList.add(subtask1);
-        subtaskList.add(subtask2);
+        Subtask buyPotato = new Subtask("Купить картошку", "2 кг", "NEW", goToShopId);
+        Subtask buyMilk = new Subtask("Купить молоко", "3 л", "NEW", goToShopId);
+        int buyPotatoId = manager.addSubtask(buyPotato);
+        int buyMilkId = manager.addSubtask(buyMilk);
 
-        Epic epic1 = new Epic("Купить продукты домой", "Вернулись с отпуска, есть нечего", subtaskList);
-        manager.createEpic(epic1);
+        // создать эпик с одной подзадачей
+        Epic washCar = new Epic("Помыть машину", "Давно не заезжал на мойку", "NEW");
+        int washCarId = manager.addEpic(washCar);
 
-        // создаем эпик с 1 подзадачей
-        Subtask subtask3 = new Subtask("Помыть пол", "На этом можно и закончить");
-        List<Subtask> subtaskList2 = new ArrayList<>();
+        Subtask payCarWashing = new Subtask("Закинуть деньги на карту", "50 р", "NEW", washCarId);
+        int payCarWashingId = manager.addSubtask(payCarWashing);
 
-        manager.createSubtask(subtask3);
-        subtaskList2.add(subtask3);
-
-        Epic epic2 = new Epic("Убраться дома", "И правда грязно...", subtaskList2);
-        manager.createEpic(epic2);
-
-        // печатаем все задачи, эпики и подзадачи
+        // напечатать все задачи, эпики и подзадачи
         System.out.println(manager.getAllTasks());
         System.out.println(manager.getAllEpics());
         System.out.println(manager.getAllSubtasks());
         System.out.println();
 
-        // обновляем подзадачу, проверяем его статус и статус его эпика (оба должны стать "DONE")
-        subtask3 = new Subtask("Помыть пол", "На этом можно и закончить", "DONE");
-        manager.updateSubtask(subtask3);
+        // обновить подзадачи, проверить их статус и статус их эпика (все должны стать "DONE")
+        Subtask newBuyPotato = new Subtask("Купить картошку", "2 кг", "DONE", goToShopId);
+        Subtask newBuyMilk = new Subtask("Купить молоко", "3 л", "DONE", goToShopId);
+        newBuyPotato.setId(buyPotatoId);
+        newBuyMilk.setId(buyMilkId);
 
-        System.out.println(manager.getEpicById(2).getSubtasks().get(0).getStatus());
-        System.out.println(manager.getEpicById(2).getStatus());
+        manager.updateSubtask(newBuyPotato);
+        manager.updateSubtask(newBuyMilk);
+
+        System.out.println(manager.getSubtaskById(buyPotatoId).getStatus());
+        System.out.println(manager.getSubtaskById(buyMilkId).getStatus());
+        System.out.println(goToShop.getStatus());
         System.out.println();
 
-        // удаляем одну задачу и один эпик
-        manager.removeTaskById(1);
-        manager.removeEpicById(1);
+        // попробовать удалить одну из задач и один из эпиков
+        manager.removeTaskById(walkWithCatId);
+        manager.removeEpicById(washCarId);
 
         System.out.println(manager.getAllTasks());
         System.out.println(manager.getAllEpics());
-        System.out.println(manager.getAllSubtasks());
-        System.out.println();
-
-        // удаляем все задачи, подзадачи и эпики
-        manager.removeAllSubtasks();
-        manager.removeAllEpics();
-        manager.removeAllTasks();
-
-        System.out.println(manager.getAllSubtasks());
-        System.out.println(manager.getAllEpics());
-        System.out.println(manager.getAllTasks());
     }
 }
