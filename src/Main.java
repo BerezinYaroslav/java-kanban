@@ -3,26 +3,26 @@ public class Main {
         Manager manager = new Manager();
 
         // создать 2 задачи
-        Task walkWithCat = new Task("Погулять с котом", "А то сидит весь день дома", "NEW");
-        Task payEducation = new Task("Оплатить обучение", "Оплатить до 12.11.22", "NEW");
+        Task walkWithCat = new Task("Погулять с котом", "А то сидит весь день дома", Status.NEW);
+        Task payEducation = new Task("Оплатить обучение", "Оплатить до 12.11.22", Status.NEW);
 
         int walkWithCatId = manager.addTask(walkWithCat);
         int payEducationId = manager.addTask(payEducation);
 
         // создать эпик с двумя подзадачами
-        Epic goToShop = new Epic("Сходить в магазин", "Холодильник пустой", "NEW");
+        Epic goToShop = new Epic("Сходить в магазин", "Холодильник пустой", Status.NEW);
         int goToShopId = manager.addEpic(goToShop);
 
-        Subtask buyPotato = new Subtask("Купить картошку", "2 кг", "NEW", goToShopId);
-        Subtask buyMilk = new Subtask("Купить молоко", "3 л", "NEW", goToShopId);
+        Subtask buyPotato = new Subtask("Купить картошку", "2 кг", Status.NEW, goToShopId);
+        Subtask buyMilk = new Subtask("Купить молоко", "3 л", Status.NEW, goToShopId);
         int buyPotatoId = manager.addSubtask(buyPotato);
         int buyMilkId = manager.addSubtask(buyMilk);
 
         // создать эпик с одной подзадачей
-        Epic washCar = new Epic("Помыть машину", "Давно не заезжал на мойку", "NEW");
+        Epic washCar = new Epic("Помыть машину", "Давно не заезжал на мойку", Status.NEW);
         int washCarId = manager.addEpic(washCar);
 
-        Subtask payCarWashing = new Subtask("Закинуть деньги на карту", "50 р", "NEW", washCarId);
+        Subtask payCarWashing = new Subtask("Закинуть деньги на карту", "50 р", Status.NEW, washCarId);
         int payCarWashingId = manager.addSubtask(payCarWashing);
 
         // напечатать все задачи, эпики и подзадачи
@@ -32,8 +32,8 @@ public class Main {
         System.out.println();
 
         // обновить подзадачи, проверить их статус и статус их эпика (все должны стать "DONE")
-        Subtask newBuyPotato = new Subtask("Купить картошку", "2 кг", "DONE", goToShopId);
-        Subtask newBuyMilk = new Subtask("Купить молоко", "3 л", "DONE", goToShopId);
+        Subtask newBuyPotato = new Subtask("Купить картошку", "2 кг", Status.NEW, goToShopId);
+        Subtask newBuyMilk = new Subtask("Купить молоко", "3 л", Status.NEW, goToShopId);
         newBuyPotato.setId(buyPotatoId);
         newBuyMilk.setId(buyMilkId);
 
