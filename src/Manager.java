@@ -75,15 +75,13 @@ public class Manager {
 
         if (getEpicById(subtask.getEpicId()) != null) {
             epic = getEpicById(subtask.getEpicId());
+            epic.addSubtaskId(id);
+            subtasks.put(id, subtask);
+            updateEpic(epic);
+            return id;
         } else {
-            epic = new Epic("No name", "No description", Status.NEW);
-            epic.setId(subtask.getEpicId());
+            return -1;
         }
-
-        epic.addSubtaskId(id);
-        subtasks.put(id, subtask);
-        updateEpic(epic);
-        return id;
     }
 
     public Status getEpicStatus(Epic epic) {
@@ -124,8 +122,11 @@ public class Manager {
     }
 
     public void updateEpic(Epic epic) {
-        epic.setStatus(getEpicStatus(epic));
-        epics.put(epic.getId(), epic);
+        if (epic.getId() != null && epics.containsKey(epic.getId())) {
+            epics.put(epic.getId(), epic);
+        } else {
+            addEpic(epic);
+        }
     }
 
     public void updateSubtask(Subtask subtask) {
