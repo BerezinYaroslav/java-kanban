@@ -152,7 +152,14 @@ public class Manager {
         subtasks.remove(id);
     }
 
-    public List<Integer> getSubtasksIdsByEpic(Epic epic) {
-        return epic.getSubtasksIds();
+    public List<Subtask> getSubtasksByEpic(Epic epic) {
+        List<Integer> ids = epic.getSubtasksIds();
+        List<Subtask> subtaskList = new ArrayList<>();
+
+        for (Integer id : ids) {
+            subtaskList.add(getSubtaskById(id));
+        }
+
+        return subtaskList;
     }
 }
