@@ -3,13 +3,13 @@ import java.util.HashMap;
 import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
-    private int taskId = 0;
-    private int epicsId = 0;
-    private int subtaskId = 0;
+    private static int taskId = 0;
+    private static int epicsId = 0;
+    private static int subtaskId = 0;
 
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private static final HashMap<Integer, Task> tasks = new HashMap<>();
+    private static final HashMap<Integer, Epic> epics = new HashMap<>();
+    private static final HashMap<Integer, Subtask> subtasks = new HashMap<>();
 
     @Override
     public List<Task> getAllTasks() {
