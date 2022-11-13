@@ -18,13 +18,18 @@ public class Main {
         int buyMilkId = manager.addSubtask(buyMilk);
 
         // вызвать разные методы интерфейса TaskManager и напечатайте историю
-        manager.getTaskById(1);
+        manager.getTaskById(walkWithCatId);
         System.out.println(Managers.getDefaultHistory().getHistory());
 
-        manager.getEpicById(1);
+        manager.getEpicById(goToShopId);
         System.out.println(Managers.getDefaultHistory().getHistory());
 
-        manager.getSubtaskById(1);
+        manager.getSubtaskById(buyPotatoId);
         System.out.println(Managers.getDefaultHistory().getHistory());
+
+        System.out.println(manager.getAllTasks());
+        manager.removeAllEpics();
+        manager.removeAllTasks();
+        System.out.println(manager.getAllTasks());
     }
 }
