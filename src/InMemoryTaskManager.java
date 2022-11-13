@@ -3,6 +3,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
+    HistoryManager historyManager = Managers.getDefaultHistory();
+
     private static int taskId = 0;
     private static int epicsId = 0;
     private static int subtaskId = 0;
@@ -192,5 +194,15 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         return subtaskList;
+    }
+
+    @Override
+    public void add(Task task) {
+        historyManager.add(task);
+    }
+
+    @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
     }
 }
