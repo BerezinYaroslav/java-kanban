@@ -1,4 +1,4 @@
-package Tasks;
+package TaskTracker.Tasks;
 
 public class Task {
     private String name;
@@ -46,7 +46,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Tasks.Task{" +
+        return "TaskTracker.Tasks.Task{" +
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", id=" + id +

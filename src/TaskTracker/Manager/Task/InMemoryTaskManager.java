@@ -1,11 +1,11 @@
-package Manager.Task;
+package TaskTracker.Manager.Task;
 
-import Manager.History.HistoryManager;
-import Manager.Managers;
-import Tasks.Epic;
-import Tasks.TaskStatus;
-import Tasks.Subtask;
-import Tasks.Task;
+import TaskTracker.Manager.History.HistoryManager;
+import TaskTracker.Manager.Managers;
+import TaskTracker.Tasks.Epic;
+import TaskTracker.Tasks.TaskStatus;
+import TaskTracker.Tasks.Subtask;
+import TaskTracker.Tasks.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;

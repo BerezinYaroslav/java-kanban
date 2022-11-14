@@ -6,8 +6,9 @@
 3. Менять статус задачи.
 
 Приложение написано на Java. Пример кода:
+
 ```java
-package Tasks;
+package TaskTracker.Tasks;
 
 public class Task {
     private String name;

@@ -1,9 +1,11 @@
-import Manager.Managers;
-import Manager.Task.TaskManager;
-import Tasks.Epic;
-import Tasks.TaskStatus;
-import Tasks.Subtask;
-import Tasks.Task;
+package TaskTracker;
+
+import TaskTracker.Manager.Managers;
+import TaskTracker.Manager.Task.TaskManager;
+import TaskTracker.Tasks.Epic;
+import TaskTracker.Tasks.TaskStatus;
+import TaskTracker.Tasks.Subtask;
+import TaskTracker.Tasks.Task;
 
 public class Main {
     public static void main(String[] args) {
@@ -24,7 +26,7 @@ public class Main {
         int buyPotatoId = taskManager.addSubtask(buyPotato);
         int buyMilkId = taskManager.addSubtask(buyMilk);
 
-        // вызвать разные методы интерфейса Manager.Task.TaskManager и напечатать историю
+        // вызвать разные методы интерфейса TaskTracker.Manager.Task.TaskManager и напечатать историю
         taskManager.getTaskById(walkWithCatId);
         System.out.println(taskManager.getHistory());
 

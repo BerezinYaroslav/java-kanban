@@ -1,4 +1,4 @@
-package Tasks;
+package TaskTracker.Tasks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "Tasks.Epic{" +
+        return "TaskTracker.Tasks.Epic{" +
                 "name='" + getName() + '\'' +
                 ", description='" + getDescription() + '\'' +
                 ", id=" + getId() +

@@ -1,4 +1,4 @@
-package Tasks;
+package TaskTracker.Tasks;
 
 public class Subtask extends Task {
     private Integer epicId;
@@ -18,7 +18,7 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Tasks.Subtask{" +
+        return "TaskTracker.Tasks.Subtask{" +
                 "name='" + getName() + '\'' +
                 ", description='" + getDescription() + '\'' +
                 ", id=" + getId() +
