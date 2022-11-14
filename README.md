@@ -7,16 +7,17 @@
 
 Приложение написано на Java. Пример кода:
 ```java
-public class Tasks.Task {
-    protected String name;
-    protected String description;
-    protected int id;
-    protected String taskStatus;
+package Tasks;
 
-    public Tasks.Task(String name, String description, int id, String taskStatus) {
+public class Task {
+    private String name;
+    private String description;
+    private Integer id;
+    private TaskStatus taskStatus;
+
+    public Task(String name, String description, TaskStatus taskStatus) {
         this.name = name;
         this.description = description;
-        this.id = id;
         this.taskStatus = taskStatus;
     }
 }
