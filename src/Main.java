@@ -17,7 +17,7 @@ public class Main {
         int buyPotatoId = taskManager.addSubtask(buyPotato);
         int buyMilkId = taskManager.addSubtask(buyMilk);
 
-        // вызвать разные методы интерфейса TaskManager и напечатайте историю
+        // вызвать разные методы интерфейса TaskManager и напечатать историю
         taskManager.getTaskById(walkWithCatId);
         System.out.println(taskManager.getHistory());
 
@@ -26,10 +26,18 @@ public class Main {
 
         taskManager.getSubtaskById(buyPotatoId);
         System.out.println(taskManager.getHistory());
+        System.out.println();
 
+        // удалить все таски
         System.out.println(taskManager.getAllTasks());
         taskManager.removeAllEpics();
         taskManager.removeAllTasks();
         System.out.println(taskManager.getAllTasks());
+        System.out.println();
+
+        // стоит добавить тестирование методов истории
+        System.out.println(taskManager.getHistory());
+        taskManager.add(buyMilk);
+        System.out.println(taskManager.getHistory());
     }
 }
