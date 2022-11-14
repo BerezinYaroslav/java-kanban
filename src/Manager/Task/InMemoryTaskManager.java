@@ -1,3 +1,12 @@
+package Manager.Task;
+
+import Manager.History.HistoryManager;
+import Manager.Managers;
+import Tasks.Epic;
+import Tasks.TaskStatus;
+import Tasks.Subtask;
+import Tasks.Task;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -109,33 +118,33 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Status getEpicStatus(Epic epic) {
+    public TaskStatus getEpicStatus(Epic epic) {
         boolean isAllSubtasksNew = true;
         boolean isAllSubtasksDone = true;
 
-        Status status;
+        TaskStatus taskStatus;
 
         for (Integer id : epic.getSubtasksIds()) {
             Subtask subtask = getSubtaskById(id);
 
-            if (!subtask.getStatus().equals(Status.NEW)) {
+            if (!subtask.getStatus().equals(TaskStatus.NEW)) {
                 isAllSubtasksNew = false;
             }
 
-            if (!subtask.getStatus().equals(Status.DONE)) {
+            if (!subtask.getStatus().equals(TaskStatus.DONE)) {
                 isAllSubtasksDone = false;
             }
         }
 
         if (isAllSubtasksNew) {
-            status = Status.NEW;
+            taskStatus = TaskStatus.NEW;
         } else if (isAllSubtasksDone) {
-            status = Status.DONE;
+            taskStatus = TaskStatus.DONE;
         } else {
-            status = Status.IN_PROGRESS;
+            taskStatus = TaskStatus.IN_PROGRESS;
         }
 
-        return status;
+        return taskStatus;
     }
 
     @Override

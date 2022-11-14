@@ -1,3 +1,10 @@
+package Manager.Task;
+
+import Tasks.Epic;
+import Tasks.TaskStatus;
+import Tasks.Subtask;
+import Tasks.Task;
+
 import java.util.List;
 
 public interface TaskManager {
@@ -25,7 +32,7 @@ public interface TaskManager {
 
     Integer addSubtask(Subtask subtask);
 
-    Status getEpicStatus(Epic epic);
+    TaskStatus getEpicStatus(Epic epic);
 
     void updateTask(Task task);
 

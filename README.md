@@ -7,17 +7,17 @@
 
 Приложение написано на Java. Пример кода:
 ```java
-public class Task {
+public class Tasks.Task {
     protected String name;
     protected String description;
     protected int id;
-    protected String status;
+    protected String taskStatus;
 
-    public Task(String name, String description, int id, String status) {
+    public Tasks.Task(String name, String description, int id, String taskStatus) {
         this.name = name;
         this.description = description;
         this.id = id;
-        this.status = status;
+        this.taskStatus = taskStatus;
     }
 }
 ```
