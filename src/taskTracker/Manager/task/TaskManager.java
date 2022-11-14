@@ -1,9 +1,9 @@
-package TaskTracker.Manager.Task;
+package taskTracker.Manager.task;
 
-import TaskTracker.Tasks.Epic;
-import TaskTracker.Tasks.TaskStatus;
-import TaskTracker.Tasks.Subtask;
-import TaskTracker.Tasks.Task;
+import taskTracker.tasks.Epic;
+import taskTracker.tasks.TaskStatus;
+import taskTracker.tasks.Subtask;
+import taskTracker.tasks.Task;
 
 import java.util.List;
 
