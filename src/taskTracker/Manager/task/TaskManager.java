@@ -6,6 +6,7 @@ import taskTracker.tasks.Subtask;
 import taskTracker.tasks.Task;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TaskManager {
     List<Task> getAllTasks();
@@ -51,4 +52,6 @@ public interface TaskManager {
     void add(Task task);
 
     List<Task> getHistory();
+
+    void removeFromHistory(int id);
 }
