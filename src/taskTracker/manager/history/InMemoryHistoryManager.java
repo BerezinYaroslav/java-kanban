@@ -5,7 +5,7 @@ import taskTracker.tasks.Task;
 import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    Map<Integer, Node> map = new HashMap<>();
+    private final Map<Integer, Node> map = new HashMap<>();
 
     private Node head;
     private Node tail;
@@ -32,39 +32,41 @@ public class InMemoryHistoryManager implements HistoryManager {
         tail = newNode;
         int id = task.getId();
 
+        if (map.containsKey(id)) {
+            remove(id);
+        }
+
+        map.put(task.getId(), newNode);
+
         if (oldTail == null) {
             head = newNode;
         } else {
             oldTail.next = newNode;
         }
 
-        if (map.containsKey(id)) {
-            remove(id);
-        }
-
-        map.put(task.getId(), newNode);
         size++;
     }
 
+    // дико извиняюсь за прошлую работу, от такого ТЗ голова кругом...
     private void removeNode(int id) {
         if (map.containsKey(id)) {
-            Node x = map.get(id);
-            Node prev = x.prev;
-            Node next = x.next;
+            Node currentNode = map.get(id);
+            Node prev = currentNode.prev;
+            Node next = currentNode.next;
 
             if (prev == null) {
-                head = x.next;
+                head = currentNode.next;
             } else {
                 prev.next = next;
             }
 
             if (next == null) {
-                tail = x.prev;
+                tail = currentNode.prev;
             } else {
                 next.prev = prev;
-                x.next = null;
             }
 
+            map.remove(id);
             size--;
         }
     }
@@ -85,10 +87,10 @@ public class InMemoryHistoryManager implements HistoryManager {
         return this.size;
     }
 
-    class Node {
-        public Task data;
-        public Node next;
-        public Node prev;
+    private class Node {
+        private Task data;
+        private Node next;
+        private Node prev;
 
         public Node(Node prev, Task data, Node next) {
             this.data = data;
