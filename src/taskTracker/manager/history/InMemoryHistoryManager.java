@@ -26,17 +26,18 @@ public class InMemoryHistoryManager implements HistoryManager {
         removeNode(id);
     }
 
+    // Правильно ли я понимаю, что мапить в данном контексте - создавать и инициализировать данные,
+    // связанные с новым таском (строки 38-40)? Я раз 10 перечитал замечание, только потом понял, в чем проблема)
     private void linkLast(Task task) {
-        final Node oldTail = tail;
-        final Node newNode = new Node(oldTail, task, null);
-        tail = newNode;
         int id = task.getId();
 
         if (map.containsKey(id)) {
             remove(id);
         }
 
-        map.put(task.getId(), newNode);
+        final Node oldTail = tail;
+        final Node newNode = new Node(oldTail, task, null);
+        tail = newNode;
 
         if (oldTail == null) {
             head = newNode;
@@ -44,6 +45,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             oldTail.next = newNode;
         }
 
+        map.put(task.getId(), newNode);
         size++;
     }
 
