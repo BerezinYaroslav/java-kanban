@@ -1,7 +1,7 @@
-package taskTracker.Manager.task;
+package taskTracker.manager.task;
 
-import taskTracker.Manager.history.HistoryManager;
-import taskTracker.Manager.Managers;
+import taskTracker.manager.history.HistoryManager;
+import taskTracker.manager.Managers;
 import taskTracker.tasks.Epic;
 import taskTracker.tasks.TaskStatus;
 import taskTracker.tasks.Subtask;

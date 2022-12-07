@@ -1,9 +1,8 @@
-package taskTracker.Manager.history;
+package taskTracker.manager.history;
 
 import taskTracker.tasks.Task;
 
 import java.util.List;
-import java.util.Set;
 
 public interface HistoryManager {
     void add(Task task);

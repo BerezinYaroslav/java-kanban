@@ -1,4 +1,4 @@
-package taskTracker.Manager.task;
+package taskTracker.manager.task;
 
 import taskTracker.tasks.Epic;
 import taskTracker.tasks.TaskStatus;
@@ -6,7 +6,6 @@ import taskTracker.tasks.Subtask;
 import taskTracker.tasks.Task;
 
 import java.util.List;
-import java.util.Set;
 
 public interface TaskManager {
     List<Task> getAllTasks();
