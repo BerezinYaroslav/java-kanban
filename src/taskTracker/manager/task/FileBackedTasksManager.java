@@ -1,6 +1,9 @@
 package taskTracker.manager.task;
 
+import taskTracker.manager.Managers;
+import taskTracker.manager.exception.ManagerSaveException;
 import taskTracker.tasks.*;
+import taskTracker.util.StringUtil;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -9,12 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
-    private String path;
+    private final String path;
 
     public static void main(String[] args) {
-
         FileBackedTasksManager fileBackedTasksManager =
-                new FileBackedTasksManager("src/taskTracker/files/historyFile.csv");
+                Managers.getDefaultFileBackedTasksManager("src/taskTracker/files/historyFile.csv");
 
         int firstTaskId = fileBackedTasksManager.addTask(
                 new Task("Почитать книгу по программированию", "Просто потому что", TaskStatus.NEW)
@@ -40,11 +42,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         fileBackedTasksManager.getTaskById(firstTaskId);
         fileBackedTasksManager.getTaskById(secondTaskId);
         fileBackedTasksManager.getSubtaskById(secondSubtaskId);
-//
-        FileBackedTasksManager fileBackedTasksManager1 = new FileBackedTasksManager(fileBackedTasksManager.path);
-        fileBackedTasksManager.getSubtaskById(firstSubtaskId);
-        fileBackedTasksManager.getEpicById(secondEpicId);
 
+        FileBackedTasksManager fileBackedTasksManager1 = new FileBackedTasksManager(fileBackedTasksManager.path);
+
+        fileBackedTasksManager.getTaskById(firstTaskId);
+        fileBackedTasksManager.getTaskById(secondTaskId);
+        fileBackedTasksManager.getSubtaskById(secondSubtaskId);
     }
 
     public FileBackedTasksManager(String path) {
@@ -52,7 +55,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         this.loadFromFile();
     }
 
-    // сохранять текущее состояние менеджера в указанный файл
     private void save() {
         List<Task> tasks = super.getAllTasks();
         List<Epic> epics = super.getAllEpics();
@@ -62,154 +64,58 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             writer.write("id,type,name,status,description,epic" + "\n");
 
             for (Task task : tasks) {
-                writer.write(toString(task) + "\n");
+                writer.write(StringUtil.toString(task) + "\n");
             }
 
             for (Epic epic : epics) {
-                writer.write(toString(epic) + "\n");
+                writer.write(StringUtil.toString(epic) + "\n");
             }
 
             for (Subtask subtask : subtasks) {
-                writer.write(toString((Subtask) subtask) + "\n");
+                writer.write(StringUtil.toString(subtask) + "\n");
             }
 
             writer.write("\n");
-            writer.write(historyToString());
-        } catch (Exception e) {
-            System.out.println(new ManagerSaveException().getMessage());
+            writer.write(StringUtil.historyToString(super.getHistory()));
+        } catch (IOException e) {
+            throw new ManagerSaveException();
         }
     }
 
     private void loadFromFile() {
-        save();
-
         try {
             String allFile = Files.readString(Path.of(path));
             String[] strings = allFile.split(System.lineSeparator());
             List<Integer> historyList;
 
             for (int i = 1; i < strings.length - 2; i++) {
-                Task task = fromString(strings[i]);
-                if (task.getClass() == Subtask.class) {
-                    super.addSubtask((Subtask) task);
-                } else if (task.getClass() == Epic.class) {
-                    super.addEpic((Epic) task);
+                String[] stringTask = strings[i].split(",");
+                String type = stringTask[1];
+
+                if (type.equals(TasksType.SUBTASK.toString())) {
+                    Subtask subtask = (Subtask) StringUtil.fromString(strings[i]);
+                    super.addSubtask(subtask);
+                } else if (type.equals(TasksType.EPIC.toString())) {
+                    Epic epic = (Epic) StringUtil.fromString(strings[i]);
+                    super.addEpic(epic);
                 } else {
+                    Task task = StringUtil.fromString(strings[i]);
                     super.addTask(task);
                 }
             }
 
             if (getHistory().size() > 1) {
-                historyList = historyFromString(strings[strings.length - 1]);
+                historyList = StringUtil.historyFromString(strings[strings.length - 1]);
 
                 for (Integer taskId : historyList) {
                     super.add(getTaskById(taskId));
                 }
             }
         } catch (IOException e) {
-            System.out.println(new ManagerSaveException().getMessage());
+            throw new ManagerSaveException();
         }
     }
 
-    private String toString(Task task) {
-        StringBuilder sb = new StringBuilder(task.getId()
-                + "," + task.getType()
-                + "," + task.getName()
-                + "," + task.getStatus()
-                + "," + task.getDescription());
-
-        if (task.getType() == TasksType.SUBTASK) {
-            Subtask subtask = (Subtask) task;
-            sb.append(",").append(subtask.getEpicId());
-        }
-
-        return sb.toString();
-    }
-
-    private Task fromString(String value) throws IOException {
-        String[] values = value.split(",");
-
-        String type = values[1];
-        String stringStatus = values[3];
-
-        TaskStatus status;
-
-        String taskType = TasksType.TASK.toString();
-        String epicType = TasksType.EPIC.toString();
-        String subtaskType = TasksType.SUBTASK.toString();
-
-        String statusNew = TaskStatus.NEW.toString();
-        String statusInProgress = TaskStatus.IN_PROGRESS.toString();
-        String statusDone = TaskStatus.DONE.toString();
-
-        if (stringStatus.equals(statusNew)) {
-            status = TaskStatus.NEW;
-        } else if (stringStatus.equals(statusDone)) {
-            status = TaskStatus.DONE;
-        } else {
-            status = TaskStatus.IN_PROGRESS;
-        }
-
-        Task task;
-
-        if (type.equals(taskType)) {
-            task = new Task(
-                    values[2],
-                    values[4],
-                    status
-            );
-        } else if (type.equals(epicType)) {
-            task = new Epic(
-                    values[2],
-                    values[4],
-                    status
-            );
-        } else {
-            task = new Subtask(
-                    values[2],
-                    values[4],
-                    status,
-                    Integer.parseInt(values[5])
-            );
-        }
-
-        return task;
-    }
-
-    private String historyToString() {
-        List<Task> list = super.getHistory();
-        StringBuilder sb = new StringBuilder();
-        int count = 0;
-
-        for (Task task : list) {
-            if (count != 0) {
-                sb.append(",");
-            }
-
-            sb.append(task.getId());
-            count++;
-        }
-
-        return sb.toString();
-    }
-
-    private List<Integer> historyFromString(String value) {
-        List<Integer> list = new ArrayList<>();
-
-        if (value.isEmpty()) {
-            System.out.println("Строка пустая");
-        } else {
-            String[] ids = value.split(",");
-
-            for (String id : ids) {
-                list.add(Integer.parseInt(id));
-            }
-        }
-
-        return list;
-    }
-
-    // Должен сохранять все задачи, подзадачи, эпики и историю просмотра любых задач
     @Override
     public Integer addTask(Task task) {
         int id = super.addTask(task);
@@ -319,11 +225,5 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         Subtask subtask = super.getSubtaskById(id);
         save();
         return subtask;
-    }
-}
-
-class ManagerSaveException extends Exception {
-    public String getMessage() {
-        return "Произошла ошибка: " + super.getMessage();
     }
 }

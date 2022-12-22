@@ -2,6 +2,7 @@ package taskTracker.manager;
 
 import taskTracker.manager.history.HistoryManager;
 import taskTracker.manager.history.InMemoryHistoryManager;
+import taskTracker.manager.task.FileBackedTasksManager;
 import taskTracker.manager.task.InMemoryTaskManager;
 import taskTracker.manager.task.TaskManager;
 
@@ -12,6 +13,10 @@ public class Managers {
 
     public static HistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager();
+    }
+
+    public static FileBackedTasksManager getDefaultFileBackedTasksManager(String path) {
+        return new FileBackedTasksManager(path);
     }
 }
 
