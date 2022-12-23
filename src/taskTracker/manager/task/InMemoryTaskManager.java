@@ -10,13 +10,12 @@ import taskTracker.tasks.Task;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
-    HistoryManager historyManager = Managers.getDefaultHistory();
+    private final HistoryManager historyManager = Managers.getDefaultHistory();
 
-    private int taskId = 0;
-
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    protected int taskId = 0;
+    protected final HashMap<Integer, Task> tasks = new HashMap<>();
+    protected final HashMap<Integer, Epic> epics = new HashMap<>();
+    protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();
 
     @Override
     public List<Task> getAllTasks() {

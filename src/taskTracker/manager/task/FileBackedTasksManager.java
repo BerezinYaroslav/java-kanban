@@ -8,7 +8,6 @@ import taskTracker.util.StringUtil;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
@@ -16,7 +15,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     public static void main(String[] args) {
         FileBackedTasksManager fileBackedTasksManager =
-                Managers.getDefaultFileBackedTasksManager("src/taskTracker/files/historyFile.csv");
+                Managers.getFileBackedTasksManager("src/taskTracker/files/historyFile.csv");
 
         int firstTaskId = fileBackedTasksManager.addTask(
                 new Task("Почитать книгу по программированию", "Просто потому что", TaskStatus.NEW)
@@ -24,7 +23,16 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         int secondTaskId = fileBackedTasksManager.addTask(
                 new Task("Погулять с собакой", "Скучает", TaskStatus.NEW)
         );
-
+        int TaskId3 = fileBackedTasksManager.addTask(
+                new Task("Погулять с собакой", "Скучает", TaskStatus.NEW)
+        );
+        int TaskId4 = fileBackedTasksManager.addTask(
+                new Task("Погулять с собакой", "Скучает", TaskStatus.NEW)
+        );
+        int TaskId5 = fileBackedTasksManager.addTask(
+                new Task("Погулять с собакой", "Скучает", TaskStatus.NEW)
+        );
+//
         int firstEpicId = fileBackedTasksManager.addEpic(
                 new Epic("Купить продукты", "Дома нечего есть", TaskStatus.NEW)
         );
@@ -39,15 +47,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 new Epic("Приготовиться к Новому Году", "Он совсем близко", TaskStatus.NEW)
         );
 
+        fileBackedTasksManager.removeTaskById(TaskId3);
+
         fileBackedTasksManager.getTaskById(firstTaskId);
         fileBackedTasksManager.getTaskById(secondTaskId);
-        fileBackedTasksManager.getSubtaskById(secondSubtaskId);
+
 
         FileBackedTasksManager fileBackedTasksManager1 = new FileBackedTasksManager(fileBackedTasksManager.path);
-
-        fileBackedTasksManager.getTaskById(firstTaskId);
-        fileBackedTasksManager.getTaskById(secondTaskId);
-        fileBackedTasksManager.getSubtaskById(secondSubtaskId);
     }
 
     public FileBackedTasksManager(String path) {
@@ -56,22 +62,18 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     private void save() {
-        List<Task> tasks = super.getAllTasks();
-        List<Epic> epics = super.getAllEpics();
-        List<Subtask> subtasks = super.getAllSubtasks();
-
         try (FileWriter writer = new FileWriter(path)) {
             writer.write("id,type,name,status,description,epic" + "\n");
 
-            for (Task task : tasks) {
+            for (Task task : super.getAllTasks()) {
                 writer.write(StringUtil.toString(task) + "\n");
             }
 
-            for (Epic epic : epics) {
+            for (Epic epic : super.getAllEpics()) {
                 writer.write(StringUtil.toString(epic) + "\n");
             }
 
-            for (Subtask subtask : subtasks) {
+            for (Subtask subtask : super.getAllSubtasks()) {
                 writer.write(StringUtil.toString(subtask) + "\n");
             }
 
@@ -87,22 +89,34 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             String allFile = Files.readString(Path.of(path));
             String[] strings = allFile.split(System.lineSeparator());
             List<Integer> historyList;
+            int maxId = -1;
 
             for (int i = 1; i < strings.length - 2; i++) {
                 String[] stringTask = strings[i].split(",");
-                String type = stringTask[1];
+                TasksType type = TasksType.valueOf(stringTask[1]);
 
-                if (type.equals(TasksType.SUBTASK.toString())) {
-                    Subtask subtask = (Subtask) StringUtil.fromString(strings[i]);
-                    super.addSubtask(subtask);
-                } else if (type.equals(TasksType.EPIC.toString())) {
-                    Epic epic = (Epic) StringUtil.fromString(strings[i]);
-                    super.addEpic(epic);
-                } else {
-                    Task task = StringUtil.fromString(strings[i]);
-                    super.addTask(task);
+                int id = 0;
+
+                if (type == TasksType.SUBTASK) {
+                    Subtask subtask = StringUtil.subtaskFromString(strings[i]);
+                    id = subtask.getId();
+                    subtasks.put(id, subtask);
+                } else if (type == TasksType.EPIC) {
+                    Epic epic = StringUtil.epicFromString(strings[i]);
+                    id = epic.getId();
+                    epics.put(id, epic);
+                } else if (type == TasksType.TASK) {
+                    Task task = StringUtil.taskFromString(strings[i]);
+                    id = task.getId();
+                    tasks.put(id, task);
+                }
+
+                if (id > maxId) {
+                    maxId = id;
                 }
             }
+
+            taskId += ++maxId;
 
             if (getHistory().size() > 1) {
                 historyList = StringUtil.historyFromString(strings[strings.length - 1]);

@@ -1,7 +1,5 @@
 package taskTracker.util;
 
-import taskTracker.manager.Managers;
-import taskTracker.manager.task.TaskManager;
 import taskTracker.tasks.*;
 
 import java.io.IOException;
@@ -9,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StringUtil {
-    // может, не стоит делать перегрузку, чтобы не копировать код, т.к. этот метод хорошо отрабатывает все виды задач
     public static String toString(Task task) {
         TasksType type;
 
@@ -35,35 +32,31 @@ public class StringUtil {
         return sb.toString();
     }
 
-    public static Task fromString(String value) throws IOException {
+    public static Task taskFromString(String value) throws IOException {
         String[] values = value.split(",");
 
-        Task task;
-        TaskStatus status = TaskStatus.valueOf(values[3]);
-        TasksType type = TasksType.valueOf(values[1]);
-
-        if (type == TasksType.TASK) {
-            task = new Task(
-                    values[2],
-                    values[4],
-                    status
-            );
-        } else if (type == TasksType.EPIC) {
-            task = new Epic(
-                    values[2],
-                    values[4],
-                    status
-            );
-        } else {
-            task = new Subtask(
-                    values[2],
-                    values[4],
-                    status,
-                    Integer.parseInt(values[5])
-            );
-        }
+        Task task = new Task(values[2], values[4], TaskStatus.valueOf(values[3]));
+        task.setId(Integer.parseInt(values[0]));
 
         return task;
+    }
+
+    public static Epic epicFromString(String value) throws IOException {
+        String[] values = value.split(",");
+
+        Epic epic = new Epic(values[2], values[4], TaskStatus.valueOf(values[3]));
+        epic.setId(Integer.parseInt(values[0]));
+
+        return epic;
+    }
+
+    public static Subtask subtaskFromString(String value) throws IOException {
+        String[] values = value.split(",");
+
+        Subtask subtask = new Subtask(values[2], values[4], TaskStatus.valueOf(values[3]), Integer.parseInt(values[5]));
+        subtask.setId(Integer.parseInt(values[0]));
+
+        return subtask;
     }
 
     public static String historyToString(List<Task> list) {
