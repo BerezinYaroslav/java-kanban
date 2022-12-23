@@ -116,7 +116,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 }
             }
 
-            taskId += ++maxId;
+            taskId = ++maxId;
 
             if (getHistory().size() > 1) {
                 historyList = StringUtil.historyFromString(strings[strings.length - 1]);
