@@ -2,7 +2,6 @@ package taskTracker.util;
 
 import taskTracker.tasks.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +31,7 @@ public class StringUtil {
         return sb.toString();
     }
 
-    public static Task taskFromString(String value) throws IOException {
+    public static Task taskFromString(String value) {
         String[] values = value.split(",");
 
         Task task = new Task(values[2], values[4], TaskStatus.valueOf(values[3]));
@@ -41,7 +40,7 @@ public class StringUtil {
         return task;
     }
 
-    public static Epic epicFromString(String value) throws IOException {
+    public static Epic epicFromString(String value) {
         String[] values = value.split(",");
 
         Epic epic = new Epic(values[2], values[4], TaskStatus.valueOf(values[3]));
@@ -50,7 +49,7 @@ public class StringUtil {
         return epic;
     }
 
-    public static Subtask subtaskFromString(String value) throws IOException {
+    public static Subtask subtaskFromString(String value) {
         String[] values = value.split(",");
 
         Subtask subtask = new Subtask(values[2], values[4], TaskStatus.valueOf(values[3]), Integer.parseInt(values[5]));
