@@ -1,11 +1,11 @@
 package taskTracker.manager.task;
 
-import taskTracker.manager.history.HistoryManager;
 import taskTracker.manager.Managers;
+import taskTracker.manager.history.HistoryManager;
 import taskTracker.tasks.Epic;
-import taskTracker.tasks.TaskStatus;
 import taskTracker.tasks.Subtask;
 import taskTracker.tasks.Task;
+import taskTracker.tasks.TaskStatus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -19,6 +19,54 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Epic> epics = new HashMap<>();
     protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();
 
+    Comparator<Task> comparator = (Task task1, Task task2) -> {
+        if (task1.getStartTime() != null && task2.getStartTime() != null) {
+            if (task1.getStartTime().isAfter(task2.getStartTime())) {
+                return 1;
+            } else {
+                return -1;
+            }
+        } else if (task1.getStartTime() != null) {
+            return -1;
+        } else {
+            return 1;
+        }
+    };
+
+    protected final TreeSet<Task> set = new TreeSet<>(comparator);
+
+    public String getPrioritizedTasks() {
+        set.addAll(tasks.values());
+        set.addAll(epics.values());
+        set.addAll(subtasks.values());
+
+        return set.toString();
+    }
+
+    public void checkIntersections() {
+        LocalDateTime startTime = LocalDateTime.MIN;
+        LocalDateTime endTime = LocalDateTime.MIN;
+
+        LocalDateTime taskStartTime;
+        LocalDateTime taskEndTime;
+
+        for (Task task : set) {
+            taskStartTime = task.getStartTime();
+            taskEndTime = task.getEndTime();
+
+            if ((taskStartTime.isBefore(startTime) && taskEndTime.isAfter(startTime))
+                    || (taskStartTime.isAfter(startTime) && taskEndTime.isBefore(endTime))
+                    || (taskStartTime.isBefore(endTime) && taskEndTime.isAfter(endTime)))
+            {
+                System.out.println("Таски пересекаются!");
+                System.exit(-1);
+            }
+
+            startTime = taskStartTime;
+            endTime = taskEndTime;
+        }
+    }
+
     public void configureEpicTime(Epic epic) {
         if (epic.getSubtasksIds().size() != 0 && !isAllSubtaskTimeInfoNull(epic)) {
             LocalDateTime startTime = LocalDateTime.now();
@@ -31,9 +79,12 @@ public class InMemoryTaskManager implements TaskManager {
                 subtaskStartTime = getSubtaskById(subtaskId).getStartTime();
 
                 subtaskDuration = getSubtaskById(subtaskId).getDuration();
-                durationMinutes += subtaskDuration.toMinutes();
 
-                if (subtaskStartTime.isBefore(startTime)) {
+                if (subtaskDuration != null) {
+                    durationMinutes += subtaskDuration.toMinutes();
+                }
+
+                if (subtaskStartTime != null && subtaskStartTime.isBefore(startTime)) {
                     startTime = subtaskStartTime;
                 }
             }

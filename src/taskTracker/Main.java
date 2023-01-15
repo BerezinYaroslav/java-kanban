@@ -1,52 +1,57 @@
 package taskTracker;
 
 import taskTracker.manager.Managers;
-import taskTracker.manager.task.TaskManager;
+import taskTracker.manager.task.InMemoryTaskManager;
 import taskTracker.tasks.Epic;
 import taskTracker.tasks.Subtask;
 import taskTracker.tasks.Task;
 import taskTracker.tasks.TaskStatus;
 
+import java.time.LocalDateTime;
+
 public class Main {
     public static void main(String[] args) {
-        TaskManager taskManager = Managers.getDefault();
+        InMemoryTaskManager manager = (InMemoryTaskManager) Managers.getDefault();
 
-        // создайте две задачи, эпик с тремя подзадачами и эпик без подзадач
-        int firstTaskId = taskManager.addTask(
-                new Task("Почитать книгу по программированию", "Просто потому что", TaskStatus.NEW)
+        int firstTaskId = manager.addTask(
+                new Task(
+                        "Почитать книгу по программированию",
+                        "Просто потому что",
+                        TaskStatus.NEW,
+                        LocalDateTime.now(),
+                        10)
         );
-        int secondTaskId = taskManager.addTask(
+        int secondTaskId = manager.addTask(
                 new Task("Погулять с собакой", "Скучает", TaskStatus.NEW)
         );
 
-        int firstEpicId = taskManager.addEpic(
+        int firstEpicId = manager.addEpic(
                 new Epic("Купить продукты", "Дома нечего есть", TaskStatus.NEW)
         );
-        int firstSubtaskId = taskManager.addSubtask(
-                new Subtask("Взять оливки у той женщины", "Граммов 300", TaskStatus.NEW, firstEpicId)
+        int firstSubtaskId = manager.addSubtask(
+                new Subtask(
+                        "Взять оливки у той женщины",
+                        "Граммов 300",
+                        TaskStatus.NEW,
+                        firstEpicId,
+                        LocalDateTime.now(),
+                        10)
         );
-        int secondSubtaskId = taskManager.addSubtask(
-                new Subtask("Не забыть заготовку для пиццы", "2 штуки", TaskStatus.NEW, firstEpicId)
+        int secondSubtaskId = manager.addSubtask(
+                new Subtask(
+                        "Не забыть заготовку для пиццы",
+                        "2 штуки",
+                        TaskStatus.NEW,
+                        firstEpicId,
+                        LocalDateTime.now(),
+                        10)
         );
 
-        int secondEpicId = taskManager.addEpic(
+        int secondEpicId = manager.addEpic(
                 new Epic("Приготовиться к Новому Году", "Он совсем близко", TaskStatus.NEW)
         );
 
-        // запросите созданные задачи несколько раз в разном порядке
-        // после каждого запроса выведите историю и убедитесь, что в ней нет повторов
-        System.out.println(taskManager.getTaskById(secondTaskId));
-        System.out.println(taskManager.getHistory());
-
-        System.out.println(taskManager.getEpicById(secondEpicId));
-        System.out.println(taskManager.getHistory());
-
-        // удалите задачу, которая есть в истории, и проверьте, что при печати она не будет выводиться
-        taskManager.removeEpicById(secondEpicId);
-        System.out.println(taskManager.getHistory());
-
-        // удалите эпик с тремя подзадачами и убедитесь, что из истории удалился как сам эпик, так и все его подзадачи
-        taskManager.removeEpicById(firstEpicId);
-        System.out.println(taskManager.getEpicById(firstEpicId));
+        System.out.println(manager.getPrioritizedTasks());
+        manager.checkIntersections();
     }
 }
