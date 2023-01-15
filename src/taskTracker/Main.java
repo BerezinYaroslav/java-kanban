@@ -3,9 +3,9 @@ package taskTracker;
 import taskTracker.manager.Managers;
 import taskTracker.manager.task.TaskManager;
 import taskTracker.tasks.Epic;
-import taskTracker.tasks.TaskStatus;
 import taskTracker.tasks.Subtask;
 import taskTracker.tasks.Task;
+import taskTracker.tasks.TaskStatus;
 
 public class Main {
     public static void main(String[] args) {

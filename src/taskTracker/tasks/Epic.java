@@ -1,13 +1,34 @@
 package taskTracker.tasks;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
-    private List<Integer> subtasksIds = new ArrayList<>();
+    private LocalDateTime endTime;
+    private final List<Integer> subtasksIds = new ArrayList<>();
 
     public Epic(String name, String description, TaskStatus taskStatus) {
         super(name, description, taskStatus);
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    @Override
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    @Override
+    public void setDuration(int durationMinutes) {
+        this.duration = Duration.ofMinutes(durationMinutes);
     }
 
     public void addSubtaskId(Integer id) {
@@ -18,10 +39,6 @@ public class Epic extends Task {
         return subtasksIds;
     }
 
-    public void setSubtasksIds(List<Integer> subtasksIds) {
-        this.subtasksIds = subtasksIds;
-    }
-
     @Override
     public String toString() {
         return "TaskTracker.Tasks.Epic{" +
@@ -30,6 +47,8 @@ public class Epic extends Task {
                 ", id=" + getId() +
                 ", status='" + getStatus() + '\'' +
                 ", subtasksIds='" + subtasksIds.toString() + '\'' +
+                ", startTime='" + startTime + '\'' +
+                ", duration='" + (duration == null ? null : duration.toMinutes()) + '\'' +
                 '}';
     }
 }

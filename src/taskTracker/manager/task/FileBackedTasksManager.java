@@ -1,60 +1,20 @@
 package taskTracker.manager.task;
 
-import taskTracker.manager.Managers;
 import taskTracker.manager.exception.ManagerSaveException;
-import taskTracker.tasks.*;
+import taskTracker.tasks.Epic;
+import taskTracker.tasks.Subtask;
+import taskTracker.tasks.Task;
+import taskTracker.tasks.TasksType;
 import taskTracker.util.StringUtil;
 
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
     private final String path;
-
-    public static void main(String[] args) {
-        FileBackedTasksManager fileBackedTasksManager =
-                Managers.getFileBackedTasksManager("src/taskTracker/files/historyFile.csv");
-
-        int firstTaskId = fileBackedTasksManager.addTask(
-                new Task("Почитать книгу по программированию", "Просто потому что", TaskStatus.NEW)
-        );
-        int secondTaskId = fileBackedTasksManager.addTask(
-                new Task("Погулять с собакой", "Скучает", TaskStatus.NEW)
-        );
-        int TaskId3 = fileBackedTasksManager.addTask(
-                new Task("Погулять с собакой", "Скучает", TaskStatus.NEW)
-        );
-        int TaskId4 = fileBackedTasksManager.addTask(
-                new Task("Погулять с собакой", "Скучает", TaskStatus.NEW)
-        );
-        int TaskId5 = fileBackedTasksManager.addTask(
-                new Task("Погулять с собакой", "Скучает", TaskStatus.NEW)
-        );
-
-        int firstEpicId = fileBackedTasksManager.addEpic(
-                new Epic("Купить продукты", "Дома нечего есть", TaskStatus.NEW)
-        );
-        int firstSubtaskId = fileBackedTasksManager.addSubtask(
-                new Subtask("Взять оливки у той женщины", "Граммов 300", TaskStatus.NEW, firstEpicId)
-        );
-        int secondSubtaskId = fileBackedTasksManager.addSubtask(
-                new Subtask("Не забыть заготовку для пиццы", "2 штуки", TaskStatus.NEW, firstEpicId)
-        );
-
-        int secondEpicId = fileBackedTasksManager.addEpic(
-                new Epic("Приготовиться к Новому Году", "Он совсем близко", TaskStatus.NEW)
-        );
-
-        fileBackedTasksManager.removeTaskById(TaskId3);
-
-        fileBackedTasksManager.getTaskById(firstTaskId);
-        fileBackedTasksManager.getTaskById(secondTaskId);
-
-
-        FileBackedTasksManager fileBackedTasksManager1 = new FileBackedTasksManager(fileBackedTasksManager.path);
-    }
 
     public FileBackedTasksManager(String path) {
         this.path = path;
@@ -63,7 +23,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private void save() {
         try (FileWriter writer = new FileWriter(path)) {
-            writer.write("id,type,name,status,description,epic" + "\n");
+            writer.write("id,type,name,status,description,epic,startTime,duration" + "\n");
 
             for (Task task : super.getAllTasks()) {
                 writer.write(StringUtil.toString(task) + "\n");
@@ -105,6 +65,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     Epic epic = StringUtil.epicFromString(strings[i]);
                     id = epic.getId();
                     epics.put(id, epic);
+                    configureEpicTime(epic);
                 } else if (type == TasksType.TASK) {
                     Task task = StringUtil.taskFromString(strings[i]);
                     id = task.getId();

@@ -7,6 +7,8 @@ import taskTracker.tasks.TaskStatus;
 import taskTracker.tasks.Subtask;
 import taskTracker.tasks.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -16,6 +18,46 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Task> tasks = new HashMap<>();
     protected final HashMap<Integer, Epic> epics = new HashMap<>();
     protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+
+    public void configureEpicTime(Epic epic) {
+        if (epic.getSubtasksIds().size() != 0 && !isAllSubtaskTimeInfoNull(epic)) {
+            LocalDateTime startTime = LocalDateTime.now();
+            LocalDateTime subtaskStartTime;
+
+            int durationMinutes = 0;
+            Duration subtaskDuration;
+
+            for (int subtaskId : epic.getSubtasksIds()) {
+                subtaskStartTime = getSubtaskById(subtaskId).getStartTime();
+
+                subtaskDuration = getSubtaskById(subtaskId).getDuration();
+                durationMinutes += subtaskDuration.toMinutes();
+
+                if (subtaskStartTime.isBefore(startTime)) {
+                    startTime = subtaskStartTime;
+                }
+            }
+
+            epic.setStartTime(startTime);
+            epic.setDuration(durationMinutes);
+            epic.setEndTime(startTime.plus(Duration.ofMinutes(durationMinutes)));
+        }
+    }
+
+    private boolean isAllSubtaskTimeInfoNull(Epic epic) {
+        boolean areAllNull = true;
+        Subtask subtask;
+
+        for (int subtaskId : epic.getSubtasksIds()) {
+            subtask = getSubtaskById(subtaskId);
+
+            if (subtask.getStartTime() != null && subtask.getDuration() != null) {
+                areAllNull = false;
+            }
+        }
+
+        return areAllNull;
+    }
 
     @Override
     public List<Task> getAllTasks() {
@@ -170,6 +212,8 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             addEpic(epic);
         }
+
+        configureEpicTime(epic);
     }
 
     @Override
@@ -179,6 +223,8 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             addTask(subtask);
         }
+
+        configureEpicTime(getEpicById(subtask.getEpicId()));
     }
 
     @Override
@@ -206,6 +252,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (subtasks.containsKey(id)) {
             subtasks.remove(id);
             historyManager.remove(id);
+            configureEpicTime(getEpicById(getSubtaskById(id).getEpicId()));
         }
     }
 

@@ -2,6 +2,7 @@ package taskTracker.util;
 
 import taskTracker.tasks.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,11 +22,16 @@ public class StringUtil {
                 + "," + type
                 + "," + task.getName()
                 + "," + task.getStatus()
-                + "," + task.getDescription());
+                + "," + task.getDescription()
+        );
 
         if (type == TasksType.SUBTASK) {
             Subtask subtask = (Subtask) task;
             sb.append(",").append(subtask.getEpicId());
+        }
+
+        if (task.getStartTime() != null) {
+            sb.append(",").append(task.getStartTime()).append(",").append(task.getDuration().toMinutes());
         }
 
         return sb.toString();
@@ -37,6 +43,11 @@ public class StringUtil {
         Task task = new Task(values[2], values[4], TaskStatus.valueOf(values[3]));
         task.setId(Integer.parseInt(values[0]));
 
+        if (values.length > 5) {
+            task.setStartTime(LocalDateTime.parse(values[5]));
+            task.setDuration(Integer.parseInt(values[6]));
+        }
+
         return task;
     }
 
@@ -46,6 +57,11 @@ public class StringUtil {
         Epic epic = new Epic(values[2], values[4], TaskStatus.valueOf(values[3]));
         epic.setId(Integer.parseInt(values[0]));
 
+        if (values.length > 5) {
+            epic.setStartTime(LocalDateTime.parse(values[5]));
+            epic.setDuration(Integer.parseInt(values[6]));
+        }
+
         return epic;
     }
 
@@ -54,6 +70,11 @@ public class StringUtil {
 
         Subtask subtask = new Subtask(values[2], values[4], TaskStatus.valueOf(values[3]), Integer.parseInt(values[5]));
         subtask.setId(Integer.parseInt(values[0]));
+
+        if (values.length > 6) {
+            subtask.setStartTime(LocalDateTime.parse(values[6]));
+            subtask.setDuration(Integer.parseInt(values[7]));
+        }
 
         return subtask;
     }
