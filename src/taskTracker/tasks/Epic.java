@@ -22,11 +22,6 @@ public class Epic extends Task {
     }
 
     @Override
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    @Override
     public void setDuration(int durationMinutes) {
         this.duration = Duration.ofMinutes(durationMinutes);
     }

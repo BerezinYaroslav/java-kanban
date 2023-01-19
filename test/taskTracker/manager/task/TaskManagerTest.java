@@ -16,92 +16,209 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     T manager;
 
+    static Task task;
+    static int taskId;
+    static Task savedTask;
+
+    static Epic epic;
+    static int epicId;
+    static Epic savedEpic;
+
+    static Subtask subtask;
+    static int subtaskId;
+    static Subtask savedSubtask;
+
+    static List<Task> tasks;
+    List<Subtask> subtasks;
+    List<Epic> epics;
+
+
+    private void configTasks() {
+        task = new Task("Test task", "Test task description", TaskStatus.NEW);
+        taskId = manager.addTask(task);
+        savedTask = manager.getTaskById(taskId);
+
+        epic = new Epic("Test epic", "Test epic description", TaskStatus.NEW);
+        epicId = manager.addEpic(epic);
+        savedEpic = manager.getEpicById(epicId);
+
+        subtask = new Subtask("Test subtask", "Test subtask description", TaskStatus.DONE, epicId);
+        subtaskId = manager.addSubtask(subtask);
+        savedSubtask = manager.getSubtaskById(subtaskId);
+
+        tasks = manager.getAllTasks();
+        subtasks = manager.getAllSubtasks();
+        epics = manager.getAllEpics();
+    }
+
     @BeforeEach
     public void beforeEach() {
         manager = createManager();
     }
 
+
     @Test
-    void taskTest() {
-        Task task = new Task("Test task", "Test task description", TaskStatus.NEW);
-        int taskId = manager.addTask(task);
-
-        Task savedTask = manager.getTaskById(taskId);
-
+    public void addTask_notNull() {
+        configTasks();
         assertNotNull(savedTask, "Задача не найдена.");
+    }
+
+    @Test
+    public void compareTaskWithSavedTask_equals() {
+        configTasks();
         assertEquals(task, savedTask, "Задачи не совпадают.");
+    }
 
-        List<Task> tasks = manager.getAllTasks();
-
+    @Test
+    public void getAllTasks_notNull() {
+        configTasks();
         assertNotNull(tasks, "Задачи на возвращаются.");
+    }
+
+    @Test
+    public void getTasksSize_1_sizeIs1() {
+        configTasks();
         assertEquals(1, tasks.size(), "Неверное количество задач.");
+    }
+
+    @Test
+    public void getTheFirstTask() {
+        configTasks();
         assertEquals(task, tasks.get(0), "Задачи не совпадают.");
-
-        manager.removeAllTasks();
-        assertEquals(List.of(), manager.getAllTasks(), "Задачи не очищены");
-
-        assertNull(manager.getTaskById(50), "Такой задачи не существует");
     }
 
+
     @Test
-    void subtaskTest() {
-        int epicId = manager.addEpic(new Epic("Test epic", "Test epic description", TaskStatus.NEW));
-        Subtask subtask = new Subtask(
-                "Test subtask", "Test subtask description", TaskStatus.NEW, epicId
-        );
-        int subtaskId = manager.addSubtask(subtask);
-
-        Subtask savedSubtask = manager.getSubtaskById(subtaskId);
-
+    public void addSubtask_notNull() {
+        configTasks();
         assertNotNull(savedSubtask, "Задача не найдена.");
-        assertEquals(subtask, savedSubtask, "Задачи не совпадают.");
-
-        List<Subtask> subtasks = manager.getAllSubtasks();
-
-        assertNotNull(subtasks, "Задачи на возвращаются.");
-        assertEquals(1, subtasks.size(), "Неверное количество задач.");
-        assertEquals(subtask, subtasks.get(0), "Задачи не совпадают.");
-
-        assertNotNull(subtask.getEpicId(), "Эпик отсутствует");
-        assertEquals(epicId, subtask.getEpicId(), "ID эпика не совпадает");
-
-        manager.removeAllEpics();
-        manager.removeAllSubtasks();
-        assertEquals(List.of(), manager.getAllSubtasks(), "Задачи не очищены");
-
-        assertNull(manager.getSubtaskById(50), "Такой задачи не существует");
     }
 
     @Test
-    void epicTest() {
-        Epic epic = new Epic("Test epic", "Test epic description", TaskStatus.NEW);
-        int epicId = manager.addEpic(epic);
+    public void compareSubtaskWithSavedSubtask_equals() {
+        configTasks();
+        assertEquals(subtask, savedSubtask, "Задачи не совпадают.");
+    }
 
-        Subtask subtask = new Subtask(
-                "Test subtask", "Test subtask description", TaskStatus.DONE, epicId
-        );
-        int subtaskId = manager.addSubtask(subtask);
+    @Test
+    public void getAllSubtasks_notNull() {
+        configTasks();
+        assertNotNull(subtasks, "Задачи на возвращаются.");
+    }
 
-        Epic savedEpic = manager.getEpicById(epicId);
-        Subtask savedSubtask = manager.getSubtaskById(subtaskId);
+    @Test
+    public void getSubtasksSize_1_sizeIs1() {
+        configTasks();
+        assertEquals(1, subtasks.size(), "Неверное количество задач.");
+    }
 
-        assertNotNull(savedEpic, "Задача не найдена.");
-        assertEquals(epic, savedEpic, "Задачи не совпадают.");
+    @Test
+    public void getTheFirstSubtask() {
+        configTasks();
+        assertEquals(subtask, subtasks.get(0), "Задачи не совпадают.");
+    }
 
-        List<Epic> epics = manager.getAllEpics();
+    @Test
+    public void getEpic_notNull() {
+        configTasks();
+        assertNotNull(subtask.getEpicId(), "Эпик отсутствует");
+    }
 
-        assertNotNull(epics, "Задачи на возвращаются.");
-        assertEquals(1, epics.size(), "Неверное количество задач.");
-        assertEquals(epic, epics.get(0), "Задачи не совпадают.");
+    @Test
+    public void compareEpicId_equals() {
+        configTasks();
+        assertEquals(epicId, subtask.getEpicId(), "ID эпика не совпадает");
+    }
 
-        assertEquals(TaskStatus.DONE, manager.getEpicStatus(savedEpic), "Статус не совпадает");
-
-        assertEquals(savedSubtask, manager.getSubtasksByEpic(savedEpic).get(0), "Подзадача найдена неверно");
+    @Test
+    public void removeAllTasks() {
+        configTasks();
 
         manager.removeAllEpics();
         manager.removeAllSubtasks();
-        assertEquals(List.of(), manager.getAllEpics(), "Задачи не очищены");
 
-        assertNull(manager.getEpicById(50), "Такой задачи не существует");
+        assertEquals(List.of(), manager.getAllSubtasks(), "Задачи не очищены");
+    }
+
+    @Test
+    public void getSubtaskById_itIsNull() {
+        configTasks();
+
+        manager.removeAllEpics();
+        manager.removeAllSubtasks();
+
+        assertNull(manager.getSubtaskById(subtaskId), "Такой задачи не существует");
+    }
+
+
+    @Test
+    public void addEpic_notNull() {
+        configTasks();
+        assertNotNull(savedEpic, "Задача не найдена.");
+    }
+
+    @Test
+    public void compareEpicWithSavedEpic_equals() {
+        configTasks();
+        assertEquals(epic, savedEpic, "Задачи не совпадают.");
+    }
+
+    @Test
+    public void getAllEpics_notNull() {
+        configTasks();
+        assertNotNull(epics, "Задачи на возвращаются.");
+    }
+
+    @Test
+    public void getEpicsSize_1_sizeIs1() {
+        configTasks();
+        assertEquals(1, epics.size(), "Неверное количество задач.");
+    }
+
+    @Test
+    public void getTheFirstEpic() {
+        configTasks();
+        assertEquals(epic, epics.get(0), "Задачи не совпадают.");
+    }
+
+    @Test
+    public void getEpicStatus_DONE() {
+        configTasks();
+        assertEquals(TaskStatus.DONE, manager.getEpicStatus(savedEpic), "Статус не совпадает");
+    }
+
+    @Test
+    public void compareSavedSubtaskWithEpicsFirstSubtask_equals() {
+        configTasks();
+        assertEquals(savedSubtask, manager.getSubtasksByEpic(savedEpic).get(0), "Подзадача найдена неверно");
+    }
+
+    @Test
+    public void removeAllEpics() {
+        configTasks();
+
+        manager.removeAllEpics();
+        manager.removeAllSubtasks();
+
+        assertEquals(List.of(), manager.getAllEpics(), "Задачи не очищены");
+    }
+
+    @Test
+    public void getEpicById_itIsNull() {
+        configTasks();
+
+        manager.removeAllEpics();
+        manager.removeAllSubtasks();
+
+        assertNull(manager.getEpicById(epicId), "Такой задачи не существует");
+    }
+
+    @Test
+    public void getRemovedEpicsSubtasks() {
+        configTasks();
+
+        manager.removeAllEpics();
+
+        assertNull(manager.getSubtaskById(subtaskId), "Такой задачи не существует");
     }
 }

@@ -35,17 +35,20 @@ public class InMemoryTaskManager implements TaskManager {
 
     protected final TreeSet<Task> set = new TreeSet<>(comparator);
 
-    public String getPrioritizedTasks() {
+    public TreeSet<Task> getPrioritizedTasks() {
+        set.clear();
+
         set.addAll(tasks.values());
         set.addAll(epics.values());
         set.addAll(subtasks.values());
 
-        return set.toString();
+        return set;
     }
 
-    public void checkIntersections() {
+    private boolean checkIntersections() {
         LocalDateTime startTime = LocalDateTime.MIN;
         LocalDateTime endTime = LocalDateTime.MIN;
+        boolean isIntersection = false;
 
         LocalDateTime taskStartTime;
         LocalDateTime taskEndTime;
@@ -59,39 +62,45 @@ public class InMemoryTaskManager implements TaskManager {
                     || (taskStartTime.isBefore(endTime) && taskEndTime.isAfter(endTime)))
             {
                 System.out.println("Таски пересекаются!");
-                System.exit(-1);
+                isIntersection = true;
             }
 
             startTime = taskStartTime;
             endTime = taskEndTime;
         }
+
+        return isIntersection;
     }
 
-    public void configureEpicTime(Epic epic) {
+    protected void configureEpicTime(Epic epic) {
+        // мне кажется, по условию тз у нас все поля должны быть не null для их подсчетов для эпика
         if (epic.getSubtasksIds().size() != 0 && !isAllSubtaskTimeInfoNull(epic)) {
-            LocalDateTime startTime = LocalDateTime.now();
-            LocalDateTime subtaskStartTime;
+            TreeSet<Task> set = new TreeSet<>(comparator);
+            Subtask subtask;
+
+            LocalDateTime startTime;
+            LocalDateTime epicEndTime;
 
             int durationMinutes = 0;
             Duration subtaskDuration;
 
-            for (int subtaskId : epic.getSubtasksIds()) {
-                subtaskStartTime = getSubtaskById(subtaskId).getStartTime();
+            for (int id : epic.getSubtasksIds()) {
+                subtask = getSubtaskById(id);
 
-                subtaskDuration = getSubtaskById(subtaskId).getDuration();
+                set.add(getSubtaskById(id));
+                subtaskDuration =  subtask.getDuration();
 
                 if (subtaskDuration != null) {
                     durationMinutes += subtaskDuration.toMinutes();
                 }
-
-                if (subtaskStartTime != null && subtaskStartTime.isBefore(startTime)) {
-                    startTime = subtaskStartTime;
-                }
             }
+
+            startTime = set.first().getStartTime();
+            epicEndTime = set.last().getEndTime();
 
             epic.setStartTime(startTime);
             epic.setDuration(durationMinutes);
-            epic.setEndTime(startTime.plus(Duration.ofMinutes(durationMinutes)));
+            epic.setEndTime(epicEndTime);
         }
     }
 
@@ -249,19 +258,23 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateTask(Task task) {
-        if (task.getId() != null && tasks.containsKey(task.getId())) {
+        if (task.getId() != null && tasks.containsKey(task.getId()) && !checkIntersections()) {
             tasks.put(task.getId(), task);
-        } else {
+        } else if (!checkIntersections()) {
             addTask(task);
+        } else {
+            System.out.println("Ошибка, задача не может быть обновлена, т.к. есть пересечения");
         }
     }
 
     @Override
     public void updateEpic(Epic epic) {
-        if (epic.getId() != null && epics.containsKey(epic.getId())) {
+        if (epic.getId() != null && epics.containsKey(epic.getId()) && !checkIntersections()) {
             epics.put(epic.getId(), epic);
-        } else {
+        } else if (!checkIntersections()) {
             addEpic(epic);
+        } else {
+            System.out.println("Ошибка, задача не может быть обновлена, т.к. есть пересечения");
         }
 
         configureEpicTime(epic);
@@ -269,10 +282,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateSubtask(Subtask subtask) {
-        if (subtask.getId() != null && subtasks.containsKey(subtask.getId())) {
+        if (subtask.getId() != null && subtasks.containsKey(subtask.getId()) && !checkIntersections()) {
             tasks.put(subtask.getId(), subtask);
-        } else {
+        } else if (!checkIntersections()) {
             addTask(subtask);
+        } else {
+            System.out.println("Ошибка, задача не может быть обновлена, т.к. есть пересечения");
         }
 
         configureEpicTime(getEpicById(subtask.getEpicId()));
