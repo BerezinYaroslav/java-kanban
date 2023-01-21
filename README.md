@@ -10,6 +10,8 @@
 ```java
 package taskTracker.tasks;
 
+import ru.yandex.practicum.berezin_y_a.tasks.TaskStatus;
+
 public class Task {
     private String name;
     private String description;
