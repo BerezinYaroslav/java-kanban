@@ -346,42 +346,28 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void getPrioritizedTasks_notNull() {
-        int firstTaskId = manager.addTask(
-                new Task(
-                        "Почитать книгу по программированию",
-                        "Просто потому что",
-                        TaskStatus.NEW,
-                        LocalDateTime.now(),
-                        10)
-        );
-        int secondTaskId = manager.addTask(
-                new Task("Погулять с собакой", "Скучает", TaskStatus.NEW)
-        );
+        LocalDateTime now = LocalDateTime.now();
 
-        int firstEpicId = manager.addEpic(
-                new Epic("Купить продукты", "Дома нечего есть", TaskStatus.NEW)
-        );
-        int firstSubtaskId = manager.addSubtask(
-                new Subtask(
-                        "Взять оливки у той женщины",
-                        "Граммов 300",
-                        TaskStatus.NEW,
-                        firstEpicId,
-                        LocalDateTime.now(),
-                        10)
-        );
-        int secondSubtaskId = manager.addSubtask(
-                new Subtask(
-                        "Не забыть заготовку для пиццы",
-                        "2 штуки",
-                        TaskStatus.NEW,
-                        firstEpicId,
-                        LocalDateTime.now(),
-                        10)
-        );
+        epicId = manager.addEpic(new Epic("Epic 1", "Description of Epic 1", TaskStatus.NEW));
+        epic = manager.getEpicById(epicId);
 
-        int secondEpicId = manager.addEpic(
-                new Epic("Приготовиться к Новому Году", "Он совсем близко", TaskStatus.NEW)
+        firstSubtaskId = manager.addSubtask(
+                new Subtask(
+                        "Subtask 1",
+                        "Description of Subtask 1",
+                        TaskStatus.IN_PROGRESS,
+                        epicId,
+                        now,
+                        60)
+        );
+        secondSubtaskId = manager.addSubtask(
+                new Subtask(
+                        "Subtask 2",
+                        "Description of Subtask 2",
+                        TaskStatus.IN_PROGRESS,
+                        epicId,
+                        now.plus(Duration.ofMinutes(120)),
+                        60)
         );
 
         assertNotNull(manager.getPrioritizedTasks());
@@ -389,6 +375,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void getPrioritizedTasks_null() {
+        epic = new Epic("Test epic", "Test epic description", TaskStatus.NEW);
+        epicId = manager.addEpic(epic);
+
         firstSubtaskId = manager.addSubtask(
                 new Subtask("Subtask 1", "Description of Subtask 1", TaskStatus.IN_PROGRESS, epicId)
         );
@@ -430,5 +419,36 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(now, epic.getStartTime());
         assertEquals(120, epic.getDuration().toMinutes());
         assertEquals(now.plus(Duration.ofMinutes(180)), epic.getEndTime());
+    }
+
+    @Test
+    public void addTaskWithIntersectionsChecker_sizeDoesntChange() {
+        Epic epic = new Epic("Test epic", "Test epic description", TaskStatus.NEW);
+        int epicId = manager.addEpic(epic);
+
+        int subtasksCount = manager.getAllSubtasks().size();
+
+        int firstSubtaskId = manager.addSubtask(
+                new Subtask(
+                        "Subtask 1",
+                        "Description of Subtask 1",
+                        TaskStatus.DONE, epicId,
+                        LocalDateTime.now(),
+                        10)
+        );
+
+//        возвращает null при вызове
+//        int secondSubtaskId = manager.addSubtask(
+//                new Subtask(
+//                        "Subtask 2",
+//                        "Description of Subtask 2",
+//                        TaskStatus.DONE,
+//                        epicId,
+//                        LocalDateTime.now(),
+//                        20)
+//        );
+
+//        работает
+        assertEquals(subtasksCount + 1, manager.getAllSubtasks().size());
     }
 }

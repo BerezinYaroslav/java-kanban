@@ -176,7 +176,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void removeFromHistory(int id) {
+    protected void removeFromHistory(int id) {
         super.removeFromHistory(id);
         save();
     }
