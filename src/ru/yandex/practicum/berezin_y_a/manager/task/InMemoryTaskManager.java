@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
-    private final HistoryManager historyManager = Managers.getDefaultHistory();
+    protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
     protected int taskId = 0;
     protected final HashMap<Integer, Task> tasks = new HashMap<>();
@@ -45,7 +45,6 @@ public class InMemoryTaskManager implements TaskManager {
         tasksTreeSet.clear();
 
         tasksTreeSet.addAll(tasks.values());
-        tasksTreeSet.addAll(epics.values());
         tasksTreeSet.addAll(subtasks.values());
 
         return tasksTreeSet;
@@ -60,12 +59,10 @@ public class InMemoryTaskManager implements TaskManager {
 
         LocalDateTime startTime = task.getStartTime();
         LocalDateTime endTime = task.getEndTime();
-        LocalDateTime taskStartTime;
-        LocalDateTime taskEndTime;
 
         for (Task task1 : tasksTreeSet) {
-            taskStartTime = task1.getStartTime();
-            taskEndTime = task1.getEndTime();
+            LocalDateTime taskStartTime = task1.getStartTime();
+            LocalDateTime taskEndTime = task1.getEndTime();
 
             if ((startTime != null && endTime != null && taskStartTime != null && taskEndTime != null)
                     && ((taskStartTime.isBefore(startTime) && taskEndTime.isAfter(startTime))
@@ -101,10 +98,8 @@ public class InMemoryTaskManager implements TaskManager {
             tasksSet.removeIf(task -> task.getStartTime() == null);
 
             if (tasksSet.size() > 0) {
-                epicStartTime = tasksSet.first().getStartTime();
-                epicEndTime = tasksSet.last().getEndTime();
-                epic.setStartTime(epicStartTime);
-                epic.setEndTime(epicEndTime);
+                epic.setStartTime(tasksSet.first().getStartTime());
+                epic.setEndTime(tasksSet.last().getEndTime());
             } else {
                 epic.setStartTime(null);
                 epic.setEndTime(null);
@@ -291,9 +286,9 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (checkIntersections(epic)) {
             System.out.println("Ошибка, задача не может быть обновлена, т.к. есть пересечения");
-            return;
         }
 
+        epics.put(epic.getId(), epic);
         configureEpicTime(epic);
     }
 
@@ -309,6 +304,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
 
+        subtasks.put(subtask.getId(), subtask);
         configureEpicTime(getEpicById(subtask.getEpicId()));
     }
 
@@ -351,20 +347,5 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         return subtaskList;
-    }
-
-    @Override
-    public void add(Task task) {
-        historyManager.add(task);
-    }
-
-    @Override
-    public List<Task> getHistory() {
-        return historyManager.getHistory();
-    }
-
-    // этот метод наследуется в FileBackedManager, и он явно нужен, поэтому, я считаю, он должен быть protected
-    protected void removeFromHistory(int id) {
-        historyManager.remove(id);
     }
 }

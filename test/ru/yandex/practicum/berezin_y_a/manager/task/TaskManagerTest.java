@@ -437,18 +437,19 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                         10)
         );
 
-//        возвращает null при вызове
-//        int secondSubtaskId = manager.addSubtask(
-//                new Subtask(
-//                        "Subtask 2",
-//                        "Description of Subtask 2",
-//                        TaskStatus.DONE,
-//                        epicId,
-//                        LocalDateTime.now(),
-//                        20)
-//        );
-
-//        работает
         assertEquals(subtasksCount + 1, manager.getAllSubtasks().size());
+    }
+
+    @Test
+    public void tasksSizeAndIdDontChange_taskChanged() {
+        taskId = manager.addTask(task);
+        savedTask = manager.getTaskById(taskId);
+
+        int tasksCount = manager.getAllTasks().size();
+
+        savedTask.setName("Test name");
+
+        assertEquals(tasksCount, manager.getAllTasks().size());
+        assertEquals(taskId, savedTask.getId());
     }
 }

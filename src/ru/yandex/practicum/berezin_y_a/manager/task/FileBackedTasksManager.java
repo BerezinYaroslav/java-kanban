@@ -38,7 +38,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
 
             writer.write("\n");
-            writer.write(StringUtil.historyToString(super.getHistory()));
+            writer.write(StringUtil.historyToString(getHistory()));
         } catch (IOException e) {
             throw new ManagerSaveException();
         }
@@ -83,7 +83,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 historyList = StringUtil.historyFromString(strings[strings.length - 1]);
 
                 for (Integer taskId : historyList) {
-                    super.add(getTaskById(taskId));
+                    add(getTaskById(taskId));
                 }
             }
         } catch (IOException e) {
@@ -169,16 +169,18 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         save();
     }
 
-    @Override
     public void add(Task task) {
-        super.add(task);
+        historyManager.add(task);
         save();
     }
 
-    @Override
     protected void removeFromHistory(int id) {
-        super.removeFromHistory(id);
+        historyManager.remove(id);
         save();
+    }
+
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
     }
 
     @Override

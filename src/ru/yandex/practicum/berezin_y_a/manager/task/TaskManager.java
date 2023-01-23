@@ -49,9 +49,5 @@ public interface TaskManager {
 
     List<Subtask> getSubtasksByEpic(Epic epic);
 
-    void add(Task task);
-
-    List<Task> getHistory();
-
     public TreeSet<Task> getPrioritizedTasks();
 }
