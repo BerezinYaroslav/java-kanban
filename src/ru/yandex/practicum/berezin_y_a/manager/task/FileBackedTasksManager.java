@@ -14,14 +14,16 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
-    private final String path;
+    private String path;
 
     public FileBackedTasksManager(String path) {
         this.path = path;
-        this.loadFromFile();
+        this.load();
     }
 
-    private void save() {
+    public FileBackedTasksManager() {}
+
+    protected void save() {
         try (FileWriter writer = new FileWriter(path)) {
             writer.write("id,type,name,status,description,epic,startTime,duration" + "\n");
 
@@ -44,7 +46,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    private void loadFromFile() {
+    protected void load() {
         try {
             String allFile = Files.readString(Path.of(path));
             String[] strings = allFile.split(System.lineSeparator());
