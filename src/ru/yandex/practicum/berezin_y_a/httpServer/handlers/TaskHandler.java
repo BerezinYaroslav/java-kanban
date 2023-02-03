@@ -84,7 +84,7 @@ public class TaskHandler implements HttpHandler {
                 return;
             }
 
-            if (task.getId() != null && taskManager.getAllTasks().contains(task)) {
+            if (taskManager.getAllTasks().contains(task)) {
                 taskManager.updateTask(task);
                 writeResponse(exchange, "Такая задача существует и была обновлена", 201);
                 return;
