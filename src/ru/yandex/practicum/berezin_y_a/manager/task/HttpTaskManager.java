@@ -3,6 +3,7 @@ package ru.yandex.practicum.berezin_y_a.manager.task;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import ru.yandex.practicum.berezin_y_a.httpServer.KVTaskClient;
 import ru.yandex.practicum.berezin_y_a.tasks.Epic;
 import ru.yandex.practicum.berezin_y_a.tasks.Subtask;
@@ -11,15 +12,13 @@ import ru.yandex.practicum.berezin_y_a.tasks.Task;
 import java.io.IOException;
 
 public class HttpTaskManager extends FileBackedTasksManager {
-    private KVTaskClient kv;
+    private final KVTaskClient kv;
     private final Gson json = new Gson();
 
     public HttpTaskManager(String URL) throws IOException, InterruptedException {
         this.kv = new KVTaskClient(URL);
         load();
     }
-
-    public HttpTaskManager() {}
 
     @Override
     protected void save() {
@@ -32,7 +31,14 @@ public class HttpTaskManager extends FileBackedTasksManager {
     @Override
     protected void load() {
         try {
-            JsonArray loadedArray = kv.load("task");
+            int maxId = -1;
+            JsonArray loadedArray;
+
+            if (kv.load("task") != null) {
+                loadedArray = JsonParser.parseString(kv.load("task")).getAsJsonArray();
+            } else {
+                loadedArray = null;
+            }
 
             if (loadedArray == null) {
                 return;
@@ -41,10 +47,15 @@ public class HttpTaskManager extends FileBackedTasksManager {
             for (JsonElement jsonTask : loadedArray) {
                 Task loadedTask = json.fromJson(jsonTask, Task.class);
                 int id = loadedTask.getId();
+                maxId = Math.max(maxId, id);
                 super.tasks.put(id, loadedTask);
             }
 
-            loadedArray = kv.load("epic");
+            if (kv.load("epic") != null) {
+                loadedArray = JsonParser.parseString(kv.load("epic")).getAsJsonArray();
+            } else {
+                loadedArray = null;
+            }
 
             if (loadedArray == null) {
                 return;
@@ -53,10 +64,15 @@ public class HttpTaskManager extends FileBackedTasksManager {
             for (JsonElement jsonTask : loadedArray) {
                 Epic loadedEpic = json.fromJson(jsonTask, Epic.class);
                 int id = loadedEpic.getId();
+                maxId = Math.max(maxId, id);
                 super.epics.put(id, loadedEpic);
             }
 
-            loadedArray = kv.load("subtask");
+            if (kv.load("subtask") != null) {
+                loadedArray = JsonParser.parseString(kv.load("subtask")).getAsJsonArray();
+            } else {
+                loadedArray = null;
+            }
 
             if (loadedArray == null) {
                 return;
@@ -65,14 +81,21 @@ public class HttpTaskManager extends FileBackedTasksManager {
             for (JsonElement jsonTask : loadedArray) {
                 Subtask loadedSubTask = json.fromJson(jsonTask, Subtask.class);
                 int id = loadedSubTask.getId();
+                maxId = Math.max(maxId, id);
                 super.subtasks.put(id, loadedSubTask);
             }
 
-            loadedArray = kv.load("history");
+            if (kv.load("history") != null) {
+                loadedArray = JsonParser.parseString(kv.load("history")).getAsJsonArray();
+            } else {
+                loadedArray = null;
+            }
 
             if (loadedArray == null) {
                 return;
             }
+
+            taskId = ++maxId;
 
             for (JsonElement jsonTaskId : loadedArray) {
                 if (jsonTaskId == null) {

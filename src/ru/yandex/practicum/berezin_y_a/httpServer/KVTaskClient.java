@@ -1,8 +1,5 @@
 package ru.yandex.practicum.berezin_y_a.httpServer;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -20,25 +17,15 @@ public class KVTaskClient {
 
     public KVTaskClient(String serverURL) throws IOException, InterruptedException {
         URL = serverURL;
-        uri = URI.create(URL + "/register");
-        request = HttpRequest.newBuilder()
-                .GET()
-                .uri(uri)
-                .header("Content-Type", "application/json")
-                .build();
-        client = HttpClient.newHttpClient();
+        uri = URI.create(serverURL + "/register");
+        configureGetRequestAndClient();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
         apiToken = response.body();
     }
 
     public void put(String key, String json) {
         uri = URI.create(URL + "/save/" + key + "?API_TOKEN=" + apiToken);
-        request = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .uri(uri)
-                .header("Content-Type", "application/json")
-                .build();
-        client = HttpClient.newHttpClient();
+        configurePostRequestAndClient(json);
 
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
@@ -51,14 +38,9 @@ public class KVTaskClient {
         }
     }
 
-    public JsonArray load(String key) {
+    public String load(String key) {
         uri = URI.create(URL + "/load/" + key + "?API_TOKEN=" + apiToken);
-        request = HttpRequest.newBuilder()
-                .GET()
-                .uri(uri)
-                .header("Content-Type", "application/json")
-                .build();
-        client = HttpClient.newHttpClient();
+        configureGetRequestAndClient();
 
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
@@ -68,10 +50,28 @@ public class KVTaskClient {
                 return null;
             }
 
-            return JsonParser.parseString(response.body()).getAsJsonArray();
+            return response.body();
         } catch (IOException | InterruptedException e) {
             System.out.println("Во время запроса произошла ошибка");
             return null;
         }
+    }
+
+    private void configureGetRequestAndClient() {
+        request = HttpRequest.newBuilder()
+                .GET()
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .build();
+        client = HttpClient.newHttpClient();
+    }
+
+    private void configurePostRequestAndClient(String json) {
+        request = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .build();
+        client = HttpClient.newHttpClient();
     }
 }

@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import ru.yandex.practicum.berezin_y_a.manager.task.HttpTaskManager;
+import ru.yandex.practicum.berezin_y_a.tasks.Task;
 
 import java.io.IOException;
+import java.util.List;
 
 import static ru.yandex.practicum.berezin_y_a.util.WriteResponseUtil.writeResponse;
 
@@ -29,10 +31,12 @@ public class HistoryHandler implements HttpHandler {
     }
 
     private void getHistoryList(HttpExchange exchange) throws IOException {
-        if (taskManager.getHistory().isEmpty()) {
+        List<Task> history = taskManager.getHistory();
+
+        if (history.isEmpty()) {
             writeResponse(exchange, "История пуста!", 200);
         } else {
-            String response = gson.toJson(taskManager.getHistory());
+            String response = gson.toJson(history);
             writeResponse(exchange, response, 200);
         }
     }

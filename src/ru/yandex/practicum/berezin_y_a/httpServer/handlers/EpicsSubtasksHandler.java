@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import ru.yandex.practicum.berezin_y_a.manager.task.TaskManager;
+import ru.yandex.practicum.berezin_y_a.tasks.Epic;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -30,16 +31,18 @@ public class EpicsSubtasksHandler implements HttpHandler {
     }
 
     private void getEpicSubtasks(HttpExchange exchange) throws IOException {
-        if (getTaskId(exchange).isEmpty()) {
+        Optional<Integer> optionalId = getTaskId(exchange);
+        String response;
+
+        if (optionalId.isEmpty()) {
             writeResponse(exchange, "Некорректный идентификатор!", 400);
             return;
         }
 
-        int id = getTaskId(exchange).get();
-        String response;
+        Epic epic = taskManager.getEpicById(optionalId.get());
 
-        if (taskManager.getEpicById(id) != null) {
-            response = gson.toJson(taskManager.getSubtasksByEpic(taskManager.getEpicById(id)));
+        if (epic != null) {
+            response = gson.toJson(taskManager.getSubtasksByEpic(epic));
         } else {
             writeResponse(exchange, "Задач с таким id не найдено!", 404);
             return;

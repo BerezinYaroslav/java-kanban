@@ -54,15 +54,17 @@ public class EpicHandler implements HttpHandler {
             return;
         }
 
-        if (getTaskId(exchange).isEmpty()) {
+        Optional<Integer> optionalId = getTaskId(exchange);
+
+        if (optionalId.isEmpty()) {
             writeResponse(exchange, "Некорректный идентификатор!", 400);
             return;
         }
 
-        int id = getTaskId(exchange).get();
+        Epic epic = taskManager.getEpicById(optionalId.get());
 
-        if (taskManager.getEpicById(id) != null) {
-            response = gson.toJson(taskManager.getEpicById(id));
+        if (epic != null) {
+            response = gson.toJson(epic);
         } else {
             writeResponse(exchange, "Задач с таким id не найдено!", 404);
         }
@@ -81,11 +83,9 @@ public class EpicHandler implements HttpHandler {
                 return;
             }
 
-            if (epic.getId() != null && taskManager.getAllEpics().contains(epic)) {
-                if (!epic.getSubtasksIds().isEmpty()) {
-                    for (Subtask subtask : taskManager.getSubtasksByEpic(epic)) {
-                        taskManager.updateSubtask(subtask);
-                    }
+            if (taskManager.getAllEpics().contains(epic)) {
+                for (Subtask subtask : taskManager.getSubtasksByEpic(epic)) {
+                    taskManager.updateSubtask(subtask);
                 }
 
                 writeResponse(exchange, "Эпик обновлен!", 201);
@@ -106,18 +106,18 @@ public class EpicHandler implements HttpHandler {
             return;
         }
 
-        if (getTaskId(exchange).isEmpty()) {
+        Optional<Integer> id = getTaskId(exchange);
+
+        if (id.isEmpty()) {
             return;
         }
 
-        int id = getTaskId(exchange).get();
-
-        if (taskManager.getEpicById(id) == null) {
+        if (taskManager.getEpicById(id.get()) == null) {
             writeResponse(exchange, "Задач с таким id не найдено!", 404);
             return;
         }
 
-        taskManager.removeEpicById(id);
+        taskManager.removeEpicById(id.get());
         writeResponse(exchange, "Задача успешно удалена!", 200);
     }
 

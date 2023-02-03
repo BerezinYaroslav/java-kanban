@@ -55,15 +55,17 @@ public class SubtaskHandler implements HttpHandler {
             return;
         }
 
-        if (getTaskId(exchange).isEmpty()) {
+        Optional<Integer> optionalId = getTaskId(exchange);
+
+        if (optionalId.isEmpty()) {
             writeResponse(exchange, "Некорректный идентификатор!", 400);
             return;
         }
 
-        int id = getTaskId(exchange).get();
+        Subtask subtask = taskManager.getSubtaskById(optionalId.get());
 
-        if (taskManager.getSubtaskById(id) != null) {
-            response = gson.toJson(taskManager.getSubtaskById(id));
+        if (subtask != null) {
+            response = gson.toJson(subtask);
         } else {
             writeResponse(exchange, "Задач с таким id не найдено!", 404);
         }
@@ -105,18 +107,18 @@ public class SubtaskHandler implements HttpHandler {
             return;
         }
 
-        if (getTaskId(exchange).isEmpty()) {
+        Optional<Integer> id = getTaskId(exchange);
+
+        if (id.isEmpty()) {
             return;
         }
 
-        int id = getTaskId(exchange).get();
-
-        if (taskManager.getSubtaskById(id) == null) {
+        if (taskManager.getSubtaskById(id.get()) == null) {
             writeResponse(exchange, "Сабов с таким id не найдено!", 404);
             return;
         }
 
-        taskManager.removeSubtaskById(id);
+        taskManager.removeSubtaskById(id.get());
         writeResponse(exchange, "Саб успешно удален!", 200);
     }
 

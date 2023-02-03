@@ -21,7 +21,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         this.load();
     }
 
-    public FileBackedTasksManager() {}
+    protected FileBackedTasksManager() {}
 
     protected void save() {
         try (FileWriter writer = new FileWriter(path)) {

@@ -55,15 +55,17 @@ public class TaskHandler implements HttpHandler {
             return;
         }
 
-        if (getTaskId(exchange).isEmpty()) {
+        Optional<Integer> optionalId = getTaskId(exchange);
+
+        if (optionalId.isEmpty()) {
             writeResponse(exchange, "Некорректный идентификатор!", 400);
             return;
         }
 
-        int id = getTaskId(exchange).get();
+        Task task = taskManager.getTaskById(optionalId.get());
 
-        if (taskManager.getTaskById(id) != null) {
-            response = gson.toJson(taskManager.getTaskById(id));
+        if (task != null) {
+            response = gson.toJson(task);
         } else {
             writeResponse(exchange, "Задач с таким id не найдено!", 404);
         }
@@ -102,18 +104,18 @@ public class TaskHandler implements HttpHandler {
             return;
         }
 
-        if (getTaskId(exchange).isEmpty()) {
+        Optional<Integer> id = getTaskId(exchange);
+
+        if (id.isEmpty()) {
             return;
         }
 
-        int id = getTaskId(exchange).get();
-
-        if (taskManager.getTaskById(id) == null) {
+        if (taskManager.getTaskById(id.get()) == null) {
             writeResponse(exchange, "Задач с таким id не найдено!", 404);
             return;
         }
 
-        taskManager.removeTaskById(id);
+        taskManager.removeTaskById(id.get());
         writeResponse(exchange, "Задача успешно удалена!", 200);
     }
 

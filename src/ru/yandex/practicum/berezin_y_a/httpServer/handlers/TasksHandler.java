@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import ru.yandex.practicum.berezin_y_a.manager.task.TaskManager;
+import ru.yandex.practicum.berezin_y_a.tasks.Task;
 
 import java.io.IOException;
+import java.util.TreeSet;
 
 import static ru.yandex.practicum.berezin_y_a.util.WriteResponseUtil.writeResponse;
 
@@ -29,10 +31,12 @@ public class TasksHandler implements HttpHandler {
     }
 
     private void getAllTasks(HttpExchange exchange) throws IOException {
-        if (taskManager.getPrioritizedTasks().isEmpty()) {
-            writeResponse(exchange, "Задач пока что нет :(", 200);
+        TreeSet<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
+
+        if (prioritizedTasks.isEmpty()) {
+            writeResponse(exchange, "Задач пока что нет", 200);
         } else {
-            String response = gson.toJson(taskManager.getPrioritizedTasks());
+            String response = gson.toJson(prioritizedTasks);
             writeResponse(exchange, response, 200);
         }
     }
