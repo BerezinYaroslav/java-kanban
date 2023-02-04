@@ -78,8 +78,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     protected void configureEpicTime(Epic epic) {
         if (epic.getSubtasksIds().size() != 0) {
-            LocalDateTime epicStartTime;
-            LocalDateTime epicEndTime;
             int epicDuration = 0;
 
             TreeSet<Task> tasksSet = new TreeSet<>(comparator);
@@ -338,12 +336,13 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public List<Subtask> getSubtasksByEpic(Epic epic) {
+    public List<Subtask> getSubtasksByEpic(int id) {
+        Epic epic = getEpicById(id);
         List<Integer> ids = epic.getSubtasksIds();
         List<Subtask> subtaskList = new ArrayList<>();
 
-        for (Integer id : ids) {
-            subtaskList.add(getSubtaskById(id));
+        for (Integer subtaskId : ids) {
+            subtaskList.add(getSubtaskById(subtaskId));
         }
 
         return subtaskList;

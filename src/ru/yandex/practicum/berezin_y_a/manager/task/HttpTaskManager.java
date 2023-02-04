@@ -32,23 +32,19 @@ public class HttpTaskManager extends FileBackedTasksManager {
     protected void load() {
         try {
             int maxId = -1;
-            JsonArray loadedArray;
+            JsonArray loadedArray = null;
 
             if (kv.load("task") != null) {
                 loadedArray = JsonParser.parseString(kv.load("task")).getAsJsonArray();
-            } else {
-                loadedArray = null;
             }
 
-            if (loadedArray == null) {
-                return;
-            }
-
-            for (JsonElement jsonTask : loadedArray) {
-                Task loadedTask = json.fromJson(jsonTask, Task.class);
-                int id = loadedTask.getId();
-                maxId = Math.max(maxId, id);
-                super.tasks.put(id, loadedTask);
+            if (loadedArray != null) {
+                for (JsonElement jsonTask : loadedArray) {
+                    Task loadedTask = json.fromJson(jsonTask, Task.class);
+                    int id = loadedTask.getId();
+                    maxId = Math.max(maxId, id);
+                    super.tasks.put(id, loadedTask);
+                }
             }
 
             if (kv.load("epic") != null) {

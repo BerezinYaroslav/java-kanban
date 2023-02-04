@@ -7,6 +7,7 @@ import ru.yandex.practicum.berezin_y_a.tasks.Subtask;
 import ru.yandex.practicum.berezin_y_a.tasks.Task;
 import ru.yandex.practicum.berezin_y_a.tasks.TaskStatus;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class TaskManagerTest<T extends TaskManager> {
-    public abstract T createManager();
+    public abstract T createManager() throws IOException, InterruptedException;
 
     T manager;
 
@@ -45,7 +46,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws IOException, InterruptedException {
         manager = createManager();
     }
 
@@ -241,7 +242,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         subtaskId = manager.addSubtask(subtask);
         savedSubtask = manager.getSubtaskById(subtaskId);
 
-        assertEquals(savedSubtask, manager.getSubtasksByEpic(savedEpic).get(0), "Подзадача найдена неверно");
+        assertEquals(savedSubtask, manager.getSubtasksByEpic(epicId).get(0), "Подзадача найдена неверно");
     }
 
     @Test

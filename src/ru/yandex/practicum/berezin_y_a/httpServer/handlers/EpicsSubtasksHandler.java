@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import ru.yandex.practicum.berezin_y_a.manager.task.TaskManager;
-import ru.yandex.practicum.berezin_y_a.tasks.Epic;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -21,34 +20,25 @@ public class EpicsSubtasksHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        String stringPath = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
 
         if (method.equals("GET")) {
-            getEpicSubtasks(exchange);
+            getEpicSubtasks(exchange, stringPath);
         } else {
             writeResponse(exchange, "Такого операции не существует", 404);
         }
     }
 
-    private void getEpicSubtasks(HttpExchange exchange) throws IOException {
-        Optional<Integer> optionalId = getTaskId(exchange);
-        String response;
+    private void getEpicSubtasks(HttpExchange exchange, String stringPath) throws IOException {
+        if (stringPath.startsWith("/tasks/subtask/epic?id=")) {
+            String[] id = stringPath.split("=");
 
-        if (optionalId.isEmpty()) {
-            writeResponse(exchange, "Некорректный идентификатор!", 400);
-            return;
-        }
-
-        Epic epic = taskManager.getEpicById(optionalId.get());
-
-        if (epic != null) {
-            response = gson.toJson(taskManager.getSubtasksByEpic(epic));
+            String response = gson.toJson(taskManager.getSubtasksByEpic(Integer.parseInt(id[1])));
+            writeResponse(exchange, response, 200);
         } else {
-            writeResponse(exchange, "Задач с таким id не найдено!", 404);
-            return;
+            writeResponse(exchange, "Некорректный идентификатор!", 400);
         }
-
-        writeResponse(exchange, response, 200);
     }
 
     private Optional<Integer> getTaskId(HttpExchange exchange) {

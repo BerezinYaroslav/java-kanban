@@ -27,6 +27,7 @@ public class TaskHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        String stringPath = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
 
         switch (method) {
@@ -39,7 +40,7 @@ public class TaskHandler implements HttpHandler {
                 break;
             }
             case "DELETE": {
-                deleteTask(exchange);
+                deleteTask(exchange, stringPath);
                 break;
             }
             default: {
@@ -97,26 +98,17 @@ public class TaskHandler implements HttpHandler {
         }
     }
 
-    private void deleteTask(HttpExchange exchange) throws IOException {
-        if (exchange.getRequestURI().getQuery() == null) {
+    private void deleteTask(HttpExchange exchange, String stringPath) throws IOException {
+        if (stringPath.equals("/tasks/task/")) {
             taskManager.removeAllTasks();
             writeResponse(exchange, "Задачи успешно удалены!", 200);
-            return;
+        } else {
+            if (stringPath.startsWith("/tasks/task/?id=")) {
+                String[] mass = stringPath.split("=");
+                taskManager.removeTaskById(Integer.parseInt(mass[1]));
+                writeResponse(exchange, "Задача успешно удалена!", 200);
+            }
         }
-
-        Optional<Integer> id = getTaskId(exchange);
-
-        if (id.isEmpty()) {
-            return;
-        }
-
-        if (taskManager.getTaskById(id.get()) == null) {
-            writeResponse(exchange, "Задач с таким id не найдено!", 404);
-            return;
-        }
-
-        taskManager.removeTaskById(id.get());
-        writeResponse(exchange, "Задача успешно удалена!", 200);
     }
 
     private Optional<Integer> getTaskId(HttpExchange exchange) {

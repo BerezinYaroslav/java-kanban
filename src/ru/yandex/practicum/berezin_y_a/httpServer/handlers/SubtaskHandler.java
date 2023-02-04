@@ -1,7 +1,6 @@
 package ru.yandex.practicum.berezin_y_a.httpServer.handlers;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import ru.yandex.practicum.berezin_y_a.manager.task.TaskManager;
@@ -11,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 import static ru.yandex.practicum.berezin_y_a.util.WriteResponseUtil.writeResponse;
@@ -19,7 +19,6 @@ public class SubtaskHandler implements HttpHandler {
     private final TaskManager taskManager;
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private final Gson gson = new Gson();
-    private String response;
 
     public SubtaskHandler(TaskManager newTaskManager) {
         this.taskManager = newTaskManager;
@@ -27,11 +26,12 @@ public class SubtaskHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        String stringPath = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
 
         switch (method) {
             case "GET": {
-                getSubtask(exchange);
+                getSubtask(exchange, stringPath);
                 break;
             }
             case "POST": {
@@ -48,55 +48,34 @@ public class SubtaskHandler implements HttpHandler {
         }
     }
 
-    private void getSubtask(HttpExchange exchange) throws IOException {
-        if (exchange.getRequestURI().getQuery() == null) {
-            response = gson.toJson(taskManager.getAllSubtasks());
+    private void getSubtask(HttpExchange exchange, String stringPath) throws IOException {
+        if (stringPath.equals("/tasks/subtask/")) {
+            String response = gson.toJson(taskManager.getAllSubtasks());
             writeResponse(exchange, response, 200);
-            return;
+        } else if (stringPath.startsWith("/tasks/subtask/?id=")) {
+            String[] id = stringPath.split("=");
+            Subtask subtask = taskManager.getSubtaskById(Integer.parseInt(id[1]));
+            String response = gson.toJson(subtask);
+            writeResponse(exchange, response, 200);
         }
-
-        Optional<Integer> optionalId = getTaskId(exchange);
-
-        if (optionalId.isEmpty()) {
-            writeResponse(exchange, "Некорректный идентификатор!", 400);
-            return;
-        }
-
-        Subtask subtask = taskManager.getSubtaskById(optionalId.get());
-
-        if (subtask != null) {
-            response = gson.toJson(subtask);
-        } else {
-            writeResponse(exchange, "Задач с таким id не найдено!", 404);
-        }
-
-        writeResponse(exchange, response, 200);
     }
 
 
     private void addSubtask(HttpExchange exchange) throws IOException {
-        try {
-            InputStream json = exchange.getRequestBody();
-            String jsonTask = new String(json.readAllBytes(), DEFAULT_CHARSET);
-            Subtask subtask = gson.fromJson(jsonTask, Subtask.class);
+        InputStream inputStream = exchange.getRequestBody();
+        String jsonString = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
 
-            if (subtask == null) {
-                writeResponse(exchange, "Задача не должна быть пустой!", 400);
-                return;
-            }
+        Subtask subTask = gson.fromJson(jsonString, Subtask.class);
+        List<Subtask> subtaskList = taskManager.getAllSubtasks();
 
-            if (subtask.getId() == null) {
-                taskManager.addSubtask(subtask);
-                writeResponse(exchange, "Задача успешно добавлена!", 201);
-
-            }
-
-            if (taskManager.getSubtaskById(subtask.getId()) != null) {
-                taskManager.updateSubtask(subtask);
+        if (subTask != null) {
+            if (subtaskList.contains(subTask)) {
+                taskManager.updateSubtask(subTask);
                 writeResponse(exchange, "Сабтаск обновлен!", 201);
+            } else {
+                taskManager.addSubtask(subTask);
+                writeResponse(exchange, "Задача успешно добавлена!", 201);
             }
-        } catch (JsonSyntaxException e) {
-            writeResponse(exchange, "Получен некорректный JSON", 400);
         }
     }
 

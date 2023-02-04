@@ -5,30 +5,36 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
 public class KVTaskClient {
     private HttpClient client;
     private HttpRequest request;
-    private final String apiToken;
+    private String apiToken;
     private final String URL;
     private URI uri;
     private HttpResponse<String> response;
 
-    public KVTaskClient(String serverURL) throws IOException, InterruptedException {
-        URL = serverURL;
-        uri = URI.create(serverURL + "/register");
-        configureGetRequestAndClient();
-        response = client.send(request, HttpResponse.BodyHandlers.ofString());
+    public KVTaskClient(String uriParameter) throws IOException, InterruptedException {
+        URL = uriParameter;
+        configure(uriParameter + "/register");
+    }
+
+    private void configure(String uriParameter) throws IOException, InterruptedException {
+        uri = URI.create(uriParameter);
+        request = HttpRequest.newBuilder()
+                .GET()
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .build();
+        client = HttpClient.newHttpClient();
+        response = client.send(request, HttpResponse.BodyHandlers.ofString(Charset.defaultCharset()));
         apiToken = response.body();
     }
 
     public void put(String key, String json) {
-        uri = URI.create(URL + "/save/" + key + "?API_TOKEN=" + apiToken);
-        configurePostRequestAndClient(json);
-
         try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            configure(URL + "/save/" + key + "?API_TOKEN=" + apiToken);
 
             if (response.statusCode() != 201) {
                 System.out.println("Ошибка сохранения! Код ответа: " + response.statusCode());
@@ -39,11 +45,8 @@ public class KVTaskClient {
     }
 
     public String load(String key) {
-        uri = URI.create(URL + "/load/" + key + "?API_TOKEN=" + apiToken);
-        configureGetRequestAndClient();
-
         try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            configure(URL + "/load/" + key + "?API_TOKEN=" + apiToken);
 
             if (response.statusCode() != 200) {
                 System.out.println("Ошибка загрузки! Код ответа: " + response.statusCode());
@@ -55,23 +58,5 @@ public class KVTaskClient {
             System.out.println("Во время запроса произошла ошибка");
             return null;
         }
-    }
-
-    private void configureGetRequestAndClient() {
-        request = HttpRequest.newBuilder()
-                .GET()
-                .uri(uri)
-                .header("Content-Type", "application/json")
-                .build();
-        client = HttpClient.newHttpClient();
-    }
-
-    private void configurePostRequestAndClient(String json) {
-        request = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .uri(uri)
-                .header("Content-Type", "application/json")
-                .build();
-        client = HttpClient.newHttpClient();
     }
 }

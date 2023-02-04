@@ -110,6 +110,26 @@ class HttpTaskServerTest2 {
     }
 
     @Test
+    void addOrUpdateSubtaskAndAddEpics2() throws IOException, InterruptedException {
+        Epic epic1 = new Epic("Epic1", "Epic1 description", NEW);
+        URI url = URI.create("http://localhost:8080/tasks/epic/");
+        String json = gson.toJson(epic1);
+        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
+        HttpRequest request = HttpRequest.newBuilder().uri(url).POST(body).build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(201, response.statusCode());
+        int epicId = 2;
+
+        Subtask sub1_1 = new Subtask("SubTask1 - 1", "SubTask1-1 description", NEW, epicId);
+        url = URI.create("http://localhost:8080/tasks/subtask/");
+        json = gson.toJson(sub1_1);
+        body = HttpRequest.BodyPublishers.ofString(json);
+        request = HttpRequest.newBuilder().uri(url).POST(body).build();
+        response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(201, response.statusCode());
+    }
+
+    @Test
     void deleteAllTasks() throws IOException, InterruptedException {
         URI url = URI.create("http://localhost:8080/tasks/task/");
         HttpRequest request = HttpRequest.newBuilder().uri(url).DELETE().build();
