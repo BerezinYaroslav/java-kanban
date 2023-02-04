@@ -17,11 +17,11 @@ public class KVTaskClient {
 
     public KVTaskClient(String uriParameter) throws IOException, InterruptedException {
         URL = uriParameter;
-        configure(uriParameter + "/register");
+        configure(uriParameter);
     }
 
     private void configure(String uriParameter) throws IOException, InterruptedException {
-        uri = URI.create(uriParameter);
+        uri = URI.create(uriParameter + "/register");
         request = HttpRequest.newBuilder()
                 .GET()
                 .uri(uri)

@@ -11,11 +11,14 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Optional;
 
-import static ru.yandex.practicum.berezin_y_a.util.WriteResponseUtil.writeResponse;
+import static ru.yandex.practicum.berezin_y_a.util.HttpUtil.getTaskId;
+import static ru.yandex.practicum.berezin_y_a.util.HttpUtil.writeResponse;
 
 public class EpicHandler implements HttpHandler {
     private final TaskManager taskManager;
     private final Gson gson = new Gson();
+    private String response;
+    private Optional<Integer> id;
 
     public EpicHandler(TaskManager newTaskManager) {
         this.taskManager = newTaskManager;
@@ -23,20 +26,19 @@ public class EpicHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        String stringPath = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
 
         switch (method) {
             case "GET": {
-                getEpic(exchange, stringPath);
+                getEpic(exchange);
                 break;
             }
             case "POST": {
-                addEpic(exchange, stringPath);
+                addEpic(exchange);
                 break;
             }
             case "DELETE": {
-                deleteEpic(exchange, stringPath);
+                deleteEpic(exchange);
                 break;
             }
             default: {
@@ -45,69 +47,46 @@ public class EpicHandler implements HttpHandler {
         }
     }
 
-    private void getEpic(HttpExchange exchange, String stringPath) throws IOException {
-        if (stringPath.equals("/tasks/epic/")) {
-            String response = gson.toJson(taskManager.getAllEpics());
+    private void getEpic(HttpExchange exchange) throws IOException {
+        if (exchange.getRequestURI().getQuery() == null) { // without id
+            response = gson.toJson(taskManager.getAllEpics());
             writeResponse(exchange, response, 200);
-        } else if (stringPath.startsWith("/tasks/epic/?id=")) {
-            String[] id = stringPath.split("=");
-            Epic epic = taskManager.getEpicById(Integer.parseInt(id[1]));
-            String response = gson.toJson(epic);
+        } else { // with id
+            id = getTaskId(exchange);
+            Epic epic = taskManager.getEpicById(id.get());
+            response = gson.toJson(epic);
             writeResponse(exchange, response, 200);
-        } else {
-            writeResponse(exchange, "Некорректный идентификатор!", 404);
         }
     }
 
-    private void addEpic(HttpExchange exchange, String stringPath) throws IOException {
+    private void addEpic(HttpExchange exchange) throws IOException {
         InputStream inputStream = exchange.getRequestBody();
         String jsonString = new String(inputStream.readAllBytes(), Charset.defaultCharset());
         Epic epic = gson.fromJson(jsonString, Epic.class);
 
         if (epic != null) {
-            if (stringPath.startsWith("/tasks/epic/?id=")) {
-                String[] mass = stringPath.split("=");
-                int id = Integer.parseInt(mass[1]);
+            if (exchange.getRequestURI().getQuery() != null) { // with id
+                id = getTaskId(exchange);
 
-                if (id == epic.getId()) {
-                    taskManager.updateTask(epic);
+                if (id.get().equals(epic.getId())) {
+                    taskManager.updateEpic(epic);
                     writeResponse(exchange, "Эпик обновлен!", 201);
-                } else {
-                    taskManager.addEpic(epic);
-                    writeResponse(exchange, "Задача успешно добавлена!", 201);
                 }
-            } else {
-                if (taskManager.getAllEpics().contains(epic)) {
-                    taskManager.updateTask(epic);
-                    writeResponse(exchange, "Эпик обновлен!", 201);
-                } else {
-                    taskManager.addEpic(epic);
-                    writeResponse(exchange, "Задача успешно добавлена!", 201);
-                }
+            } else { // without id
+                taskManager.addEpic(epic);
+                writeResponse(exchange, "Эпик успешно добавлен!", 201);
             }
         }
     }
 
-    private void deleteEpic(HttpExchange exchange, String stringPath) throws IOException {
-        if ("/tasks/epic/".equals(stringPath)) {
+    private void deleteEpic(HttpExchange exchange) throws IOException {
+        if (exchange.getRequestURI().getQuery() == null) { // without id
             taskManager.removeAllEpics();
-            writeResponse(exchange, "Задачи успешно удалены!", 200);
-        } else {
-            if (stringPath.startsWith("/tasks/epic/?id=")) {
-                String[] mass = stringPath.split("=");
-                taskManager.removeEpicById(Integer.parseInt(mass[1]));
-                writeResponse(exchange, "Задача успешно удалена!", 200);
-            }
-        }
-    }
-
-    private Optional<Integer> getTaskId(HttpExchange exchange) {
-        String[] pathParts = exchange.getRequestURI().getQuery().split("=");
-
-        try {
-            return Optional.of(Integer.parseInt(pathParts[1]));
-        } catch (NumberFormatException exception) {
-            return Optional.empty();
+            writeResponse(exchange, "Эпики успешно удален!", 200);
+        } else { // with id
+            id = getTaskId(exchange);
+            taskManager.removeEpicById(id.get());
+            writeResponse(exchange, "Эпик успешно удален!", 200);
         }
     }
 }

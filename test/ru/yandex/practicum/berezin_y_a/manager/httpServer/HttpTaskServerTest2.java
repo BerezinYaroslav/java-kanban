@@ -23,18 +23,18 @@ import static ru.yandex.practicum.berezin_y_a.tasks.TaskStatus.NEW;
 
 class HttpTaskServerTest2 {
     private static final KVServer kvServer;
+    private static HttpTaskServer httpTS;
+    private static Gson gson;
+    private static HttpClient client;
 
     static {
         try {
             kvServer = new KVServer();
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-
-    private static HttpTaskServer httpTS;
-    private static Gson gson;
-    private static HttpClient client;
 
     @BeforeAll
     static void setUp() throws IOException, InterruptedException {
@@ -93,33 +93,6 @@ class HttpTaskServerTest2 {
         assertEquals(201, response.statusCode());
         int epicId = 2;
 
-        Subtask sub1 = new Subtask("SubTask1 - 1", "SubTask1-1 description", NEW, epicId);
-        url = URI.create("http://localhost:8080/tasks/subtask/");
-        json = gson.toJson(sub1);
-        body = HttpRequest.BodyPublishers.ofString(json);
-        request = HttpRequest.newBuilder().uri(url).POST(body).build();
-        response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(201, response.statusCode());
-
-        url = URI.create("http://localhost:8080/tasks/subtask/");
-        HttpRequest request4 = HttpRequest.newBuilder().uri(url).GET().build();
-        HttpResponse<String> response4 = client.send(request4, HttpResponse.BodyHandlers.ofString());
-        assertEquals(200, response4.statusCode());
-        JsonArray arrayTasks = JsonParser.parseString(response4.body()).getAsJsonArray();
-        assertEquals(0, arrayTasks.size());
-    }
-
-    @Test
-    void addOrUpdateSubtaskAndAddEpics2() throws IOException, InterruptedException {
-        Epic epic1 = new Epic("Epic1", "Epic1 description", NEW);
-        URI url = URI.create("http://localhost:8080/tasks/epic/");
-        String json = gson.toJson(epic1);
-        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = HttpRequest.newBuilder().uri(url).POST(body).build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(201, response.statusCode());
-        int epicId = 2;
-
         Subtask sub1_1 = new Subtask("SubTask1 - 1", "SubTask1-1 description", NEW, epicId);
         url = URI.create("http://localhost:8080/tasks/subtask/");
         json = gson.toJson(sub1_1);
@@ -127,6 +100,28 @@ class HttpTaskServerTest2 {
         request = HttpRequest.newBuilder().uri(url).POST(body).build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(201, response.statusCode());
+
+        url = URI.create("http://localhost:8080/tasks/subtask/?id=3");
+        request = HttpRequest.newBuilder().uri(url).GET().build();
+        response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, response.statusCode());
+
+        url = URI.create("http://localhost:8080/tasks/subtask/?id=3");
+        HttpRequest request3 = HttpRequest.newBuilder().uri(url).DELETE().build();
+        HttpResponse<String> response3 = client.send(request3, HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, response3.statusCode());
+
+        url = URI.create("http://localhost:8080/tasks/epic/?id=2");
+        HttpRequest request2 = HttpRequest.newBuilder().uri(url).DELETE().build();
+        HttpResponse<String> response2 = client.send(request2, HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, response2.statusCode());
+
+        url = URI.create("http://localhost:8080/tasks/subtask/");
+        HttpRequest request4 = HttpRequest.newBuilder().uri(url).GET().build();
+        HttpResponse<String> response4 = client.send(request4, HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, response4.statusCode());
+        JsonArray arrayTasks = JsonParser.parseString(response4.body()).getAsJsonArray();
+        assertEquals(0, arrayTasks.size());
     }
 
     @Test
@@ -172,6 +167,7 @@ class HttpTaskServerTest2 {
         request = HttpRequest.newBuilder().uri(url).DELETE().build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, response.statusCode());
+
 
         url = URI.create("http://localhost:8080/tasks/subtask/");
         request = HttpRequest.newBuilder().uri(url).GET().build();

@@ -5,8 +5,9 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
-public class WriteResponseUtil {
+public class HttpUtil {
     public static void writeResponse(HttpExchange exchange, String responseString, int responseCode) throws IOException {
         if (responseString.isBlank()) {
             exchange.sendResponseHeaders(responseCode, 0);
@@ -20,5 +21,15 @@ public class WriteResponseUtil {
         }
 
         exchange.close();
+    }
+
+    public static Optional<Integer> getTaskId(HttpExchange exchange) {
+        String[] pathParts = exchange.getRequestURI().getQuery().split("=");
+
+        try {
+            return Optional.of(Integer.parseInt(pathParts[1]));
+        } catch (NumberFormatException exception) {
+            return Optional.empty();
+        }
     }
 }

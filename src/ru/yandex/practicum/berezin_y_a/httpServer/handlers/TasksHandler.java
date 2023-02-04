@@ -9,7 +9,7 @@ import ru.yandex.practicum.berezin_y_a.tasks.Task;
 import java.io.IOException;
 import java.util.TreeSet;
 
-import static ru.yandex.practicum.berezin_y_a.util.WriteResponseUtil.writeResponse;
+import static ru.yandex.practicum.berezin_y_a.util.HttpUtil.writeResponse;
 
 public class TasksHandler implements HttpHandler {
     private final TaskManager taskManager;
@@ -32,12 +32,7 @@ public class TasksHandler implements HttpHandler {
 
     private void getAllTasks(HttpExchange exchange) throws IOException {
         TreeSet<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
-
-        if (prioritizedTasks.isEmpty()) {
-            writeResponse(exchange, "Задач пока что нет", 200);
-        } else {
-            String response = gson.toJson(prioritizedTasks);
-            writeResponse(exchange, response, 200);
-        }
+        String response = gson.toJson(prioritizedTasks);
+        writeResponse(exchange, response, 200);
     }
 }

@@ -1,7 +1,6 @@
 package ru.yandex.practicum.berezin_y_a.httpServer.handlers;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import ru.yandex.practicum.berezin_y_a.manager.task.TaskManager;
@@ -10,16 +9,16 @@ import ru.yandex.practicum.berezin_y_a.tasks.Task;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-import static ru.yandex.practicum.berezin_y_a.util.WriteResponseUtil.writeResponse;
+import static ru.yandex.practicum.berezin_y_a.util.HttpUtil.getTaskId;
+import static ru.yandex.practicum.berezin_y_a.util.HttpUtil.writeResponse;
 
 public class TaskHandler implements HttpHandler {
-    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private final Gson gson = new Gson();
     private final TaskManager taskManager;
     private String response;
+    private Optional<Integer> id;
 
     public TaskHandler(TaskManager taskManager) {
         this.taskManager = taskManager;
@@ -27,7 +26,6 @@ public class TaskHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        String stringPath = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
 
         switch (method) {
@@ -40,84 +38,55 @@ public class TaskHandler implements HttpHandler {
                 break;
             }
             case "DELETE": {
-                deleteTask(exchange, stringPath);
+                deleteTask(exchange);
                 break;
             }
             default: {
-                writeResponse(exchange, "Такого операции не существует", 404);
+                writeResponse(exchange, "Такой операции не существует", 404);
             }
         }
     }
 
     private void getTask(HttpExchange exchange) throws IOException {
-        if (exchange.getRequestURI().getQuery() == null) {
+        if (exchange.getRequestURI().getQuery() == null) { // without id
             response = gson.toJson(taskManager.getAllTasks());
             writeResponse(exchange, response, 200);
-            return;
-        }
-
-        Optional<Integer> optionalId = getTaskId(exchange);
-
-        if (optionalId.isEmpty()) {
-            writeResponse(exchange, "Некорректный идентификатор!", 400);
-            return;
-        }
-
-        Task task = taskManager.getTaskById(optionalId.get());
-
-        if (task != null) {
+        } else { // with id
+            id = getTaskId(exchange);
+            Task task = taskManager.getTaskById(id.get());
             response = gson.toJson(task);
-        } else {
-            writeResponse(exchange, "Задач с таким id не найдено!", 404);
+            writeResponse(exchange, response, 200);
         }
-
-        writeResponse(exchange, response, 200);
     }
 
     private void addTask(HttpExchange exchange) throws IOException {
-        try {
-            InputStream json = exchange.getRequestBody();
-            String jsonTask = new String(json.readAllBytes(), DEFAULT_CHARSET);
-            Task task = gson.fromJson(jsonTask, Task.class);
+        InputStream inputStream = exchange.getRequestBody();
+        String jsonString = new String(inputStream.readAllBytes(), Charset.defaultCharset());
+        Task task = gson.fromJson(jsonString, Task.class);
 
-            if (task == null) {
-                writeResponse(exchange, "Задача не должна быть пустой!", 400);
-                return;
+        if (task != null) {
+            if (exchange.getRequestURI().getQuery() != null) { // with id
+                id = getTaskId(exchange);
+
+                if (id.get().equals(task.getId())) {
+                    taskManager.updateTask(task);
+                    writeResponse(exchange, "Таск обновлен!", 201);
+                }
+            } else { // without id
+                taskManager.addTask(task);
+                writeResponse(exchange, "Таск успешно добавлен!", 201);
             }
-
-            if (taskManager.getAllTasks().contains(task)) {
-                taskManager.updateTask(task);
-                writeResponse(exchange, "Такая задача существует и была обновлена", 201);
-                return;
-            }
-
-            taskManager.addTask(task);
-            writeResponse(exchange, "Задача успешно добавлена!", 201);
-        } catch (JsonSyntaxException e) {
-            writeResponse(exchange, "Получен некорректный JSON", 400);
         }
     }
 
-    private void deleteTask(HttpExchange exchange, String stringPath) throws IOException {
-        if (stringPath.equals("/tasks/task/")) {
+    private void deleteTask(HttpExchange exchange) throws IOException {
+        if (exchange.getRequestURI().getQuery() == null) { // without id
             taskManager.removeAllTasks();
-            writeResponse(exchange, "Задачи успешно удалены!", 200);
-        } else {
-            if (stringPath.startsWith("/tasks/task/?id=")) {
-                String[] mass = stringPath.split("=");
-                taskManager.removeTaskById(Integer.parseInt(mass[1]));
-                writeResponse(exchange, "Задача успешно удалена!", 200);
-            }
-        }
-    }
-
-    private Optional<Integer> getTaskId(HttpExchange exchange) {
-        String[] pathParts = exchange.getRequestURI().getQuery().split("=");
-
-        try {
-            return Optional.of(Integer.parseInt(pathParts[1]));
-        } catch (NumberFormatException exception) {
-            return Optional.empty();
+            writeResponse(exchange, "Таски успешно удален!", 200);
+        } else { // with id
+            id = getTaskId(exchange);
+            taskManager.removeTaskById(id.get());
+            writeResponse(exchange, "Таск успешно удален!", 200);
         }
     }
 }

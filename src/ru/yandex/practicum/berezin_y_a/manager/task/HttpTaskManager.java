@@ -49,63 +49,51 @@ public class HttpTaskManager extends FileBackedTasksManager {
 
             if (kv.load("epic") != null) {
                 loadedArray = JsonParser.parseString(kv.load("epic")).getAsJsonArray();
-            } else {
-                loadedArray = null;
             }
 
-            if (loadedArray == null) {
-                return;
-            }
-
-            for (JsonElement jsonTask : loadedArray) {
-                Epic loadedEpic = json.fromJson(jsonTask, Epic.class);
-                int id = loadedEpic.getId();
-                maxId = Math.max(maxId, id);
-                super.epics.put(id, loadedEpic);
+            if (loadedArray != null) {
+                for (JsonElement jsonTask : loadedArray) {
+                    Epic loadedEpic = json.fromJson(jsonTask, Epic.class);
+                    int id = loadedEpic.getId();
+                    maxId = Math.max(maxId, id);
+                    super.epics.put(id, loadedEpic);
+                }
             }
 
             if (kv.load("subtask") != null) {
                 loadedArray = JsonParser.parseString(kv.load("subtask")).getAsJsonArray();
-            } else {
-                loadedArray = null;
             }
 
-            if (loadedArray == null) {
-                return;
-            }
-
-            for (JsonElement jsonTask : loadedArray) {
-                Subtask loadedSubTask = json.fromJson(jsonTask, Subtask.class);
-                int id = loadedSubTask.getId();
-                maxId = Math.max(maxId, id);
-                super.subtasks.put(id, loadedSubTask);
+            if (loadedArray != null) {
+                for (JsonElement jsonTask : loadedArray) {
+                    Subtask loadedSubTask = json.fromJson(jsonTask, Subtask.class);
+                    int id = loadedSubTask.getId();
+                    maxId = Math.max(maxId, id);
+                    super.subtasks.put(id, loadedSubTask);
+                }
             }
 
             if (kv.load("history") != null) {
                 loadedArray = JsonParser.parseString(kv.load("history")).getAsJsonArray();
-            } else {
-                loadedArray = null;
             }
 
-            if (loadedArray == null) {
-                return;
-            }
+            if (loadedArray != null) {
+                taskId = ++maxId;
 
-            taskId = ++maxId;
+                for (JsonElement jsonTaskId : loadedArray) {
+                    if (jsonTaskId == null) {
+                        break;
+                    }
 
-            for (JsonElement jsonTaskId : loadedArray) {
-                if (jsonTaskId == null) {
-                    break;
-                }
+                    int loadedId = jsonTaskId.getAsInt();
 
-                int loadedId = jsonTaskId.getAsInt();
-
-                if (epics.containsKey(loadedId)) {
-                    getEpicById(loadedId);
-                } else if (tasks.containsKey(loadedId)) {
-                    getTaskById(loadedId);
-                } else if (subtasks.containsKey(loadedId)) {
-                    getSubtaskById(loadedId);
+                    if (epics.containsKey(loadedId)) {
+                        getEpicById(loadedId);
+                    } else if (tasks.containsKey(loadedId)) {
+                        getTaskById(loadedId);
+                    } else if (subtasks.containsKey(loadedId)) {
+                        getSubtaskById(loadedId);
+                    }
                 }
             }
         } catch (UnsupportedOperationException e) {

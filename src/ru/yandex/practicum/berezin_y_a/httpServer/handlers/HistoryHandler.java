@@ -9,7 +9,7 @@ import ru.yandex.practicum.berezin_y_a.tasks.Task;
 import java.io.IOException;
 import java.util.List;
 
-import static ru.yandex.practicum.berezin_y_a.util.WriteResponseUtil.writeResponse;
+import static ru.yandex.practicum.berezin_y_a.util.HttpUtil.writeResponse;
 
 public class HistoryHandler implements HttpHandler {
     private final HttpTaskManager taskManager;
@@ -32,12 +32,7 @@ public class HistoryHandler implements HttpHandler {
 
     private void getHistoryList(HttpExchange exchange) throws IOException {
         List<Task> history = taskManager.getHistory();
-
-        if (history.isEmpty()) {
-            writeResponse(exchange, "История пуста!", 200);
-        } else {
-            String response = gson.toJson(history);
-            writeResponse(exchange, response, 200);
-        }
+        String response = gson.toJson(history);
+        writeResponse(exchange, response, 200);
     }
 }
